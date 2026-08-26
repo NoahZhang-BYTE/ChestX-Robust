@@ -106,6 +106,17 @@ def test_prepare_nih_requires_all_metadata_columns(tmp_path):
         prepare_nih_metadata(metadata, tmp_path / "images", tmp_path / "labels.csv")
 
 
+def test_prepare_nih_rejects_schema_valid_empty_metadata(tmp_path):
+    metadata = tmp_path / "Data_Entry_2017.csv"
+    pd.DataFrame(columns=["Image Index", "Finding Labels", "Patient ID"]).to_csv(
+        metadata, index=False
+    )
+    (tmp_path / "images").mkdir()
+
+    with pytest.raises(ValueError, match="NIH metadata contains no rows"):
+        prepare_nih_metadata(metadata, tmp_path / "images", tmp_path / "labels.csv")
+
+
 def test_prepare_nih_keeps_a_single_patient_in_train(tmp_path):
     image_root = tmp_path / "images"
     _write_image(image_root / "nested" / "a.png")

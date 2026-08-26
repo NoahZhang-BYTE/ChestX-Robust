@@ -31,3 +31,9 @@ Complete.
 
 - The converter intentionally requires paired official list files to cover every metadata image. This makes incomplete list inputs fail early rather than silently assigning unpublished split membership.
 - Task 3 is still responsible for validating a prepared CSV independently; this task only validates the source metadata and conversion inputs.
+
+## Review Fix: Empty Metadata
+
+- Added `test_prepare_nih_rejects_schema_valid_empty_metadata` before changing the converter. The RED run failed with the reported `KeyError` while the converter selected absent label columns from an empty frame.
+- `_validate_metadata` now rejects a schema-valid empty NIH metadata CSV with `ValueError: NIH metadata contains no rows` before image indexing or label construction.
+- Focused verification: `& '.\\.venv\\Scripts\\python.exe' -m pytest tests\\test_nih.py -q` reported `9 passed in 3.70s`.

@@ -59,6 +59,8 @@ def _validate_metadata(metadata: pd.DataFrame) -> None:
     missing = [column for column in _METADATA_COLUMNS if column not in metadata.columns]
     if missing:
         raise ValueError(f"Missing required metadata columns: {', '.join(missing)}")
+    if metadata.empty:
+        raise ValueError("NIH metadata contains no rows")
     if metadata.loc[:, _METADATA_COLUMNS].isna().any().any():
         raise ValueError("Required metadata columns contain missing values")
     if metadata["Image Index"].astype(str).duplicated().any():
