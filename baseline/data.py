@@ -10,6 +10,8 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
+from baseline.labels import LABEL_COLUMNS
+
 
 class MultiLabelImageDataset(Dataset):
     """CSV-backed dataset with one image path column and binary label columns."""
@@ -79,9 +81,19 @@ def build_dataloaders(
 ) -> tuple[DataLoader, DataLoader, list[str]]:
     frame = pd.read_csv(csv_path)
     if not label_cols:
-        label_cols = [column for column in frame.columns if column != image_col]
+        if all(column in frame.columns for column in LABEL_COLUMNS):
+            label_cols = list(LABEL_COLUMNS)
+        else:
+            metadata_columns = {image_col, "image_id", "path", "split", "patient_id"}
+            label_cols = [column for column in frame.columns if column not in metadata_columns]
     label_cols = list(label_cols)
-    train_frame, val_frame = _split_frame(frame, val_split, seed)
+    if "split" in frame.columns:
+        train_frame = frame.loc[frame["split"] == "train"].reset_index(drop=True)
+        val_frame = frame.loc[frame["split"] == "val"].reset_index(drop=True)
+        if train_frame.empty or val_frame.empty:
+            raise ValueError("CSV split column must contain non-empty train and val rows")
+    else:
+        train_frame, val_frame = _split_frame(frame, val_split, seed)
     normalize = transforms.Normalize(
         mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
     )

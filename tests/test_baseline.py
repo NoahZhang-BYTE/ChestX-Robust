@@ -24,6 +24,26 @@ def _fixture_csv(tmp_path: Path) -> Path:
     return csv_path
 
 
+def _split_fixture_csv(tmp_path: Path) -> Path:
+    rows = []
+    for index, split in enumerate(("train", "train", "val", "test")):
+        filename = f"split_image_{index}.png"
+        Image.fromarray(np.full((24, 24, 3), index * 60, dtype=np.uint8)).save(tmp_path / filename)
+        rows.append(
+            {
+                "image_id": filename,
+                "path": filename,
+                "split": split,
+                "patient_id": f"patient_{index}",
+                "finding_a": index % 2,
+                "finding_b": (index + 1) % 2,
+            }
+        )
+    csv_path = tmp_path / "split_labels.csv"
+    pd.DataFrame(rows).to_csv(csv_path, index=False)
+    return csv_path
+
+
 def test_nih_label_definition_has_the_fixed_14_class_order():
     assert LABEL_COLUMNS == (
         "Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass",
@@ -71,6 +91,22 @@ def test_dataloaders_infer_labels_when_config_list_is_empty(tmp_path):
     assert label_cols == ["finding_a", "finding_b"]
     assert len(train_loader.dataset) == 2
     assert len(val_loader.dataset) == 1
+
+
+def test_dataloaders_use_persisted_train_and_val_splits(tmp_path):
+    csv_path = _split_fixture_csv(tmp_path)
+
+    train_loader, val_loader, label_cols = build_dataloaders(
+        csv_path=csv_path,
+        image_root=tmp_path,
+        image_col="path",
+        label_cols=["finding_a", "finding_b"],
+        batch_size=2,
+    )
+
+    assert len(train_loader.dataset) == 2
+    assert len(val_loader.dataset) == 1
+    assert label_cols == ["finding_a", "finding_b"]
 
 
 def test_metrics_handle_single_class_label_without_crashing():
