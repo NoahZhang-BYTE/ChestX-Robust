@@ -1,12 +1,16 @@
 from pathlib import Path
 import subprocess
 import sys
+from math import isfinite
 
 import pandas as pd
 import pytest
+import yaml
+from PIL import Image
 
 from baseline.labels import LABEL_COLUMNS, NUM_CLASSES
 from baseline.nih import prepare_nih_metadata, validate_labels_csv
+from smoke_test import run_smoke_test
 
 
 def _write_image(path: Path) -> None:
@@ -255,3 +259,60 @@ def test_validate_data_cli_validates_csv_and_prints_statistics(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert "Train: 1 images" in result.stdout
+
+
+def _write_valid_image(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    Image.new("RGB", (16, 16), color="white").save(path)
+
+
+def write_smoke_config(tmp_path: Path) -> Path:
+    image_root = tmp_path / "images"
+    for image_name in ("train-a.png", "train-b.png", "val.png"):
+        _write_valid_image(image_root / image_name)
+
+    frame = pd.DataFrame(
+        {
+            "image_id": ["train-a.png", "train-b.png", "val.png"],
+            "path": ["train-a.png", "train-b.png", "val.png"],
+            "split": ["train", "train", "val"],
+            "patient_id": [1, 2, 3],
+        }
+    )
+    for label in LABEL_COLUMNS:
+        frame[label] = 0
+    frame.loc[0, "Atelectasis"] = 1
+    labels_csv = tmp_path / "labels.csv"
+    frame.to_csv(labels_csv, index=False)
+
+    config = {
+        "seed": 42,
+        "device": "cpu",
+        "data": {
+            "csv_path": str(labels_csv),
+            "image_root": str(image_root),
+            "image_col": "path",
+            "label_cols": [],
+            "image_size": 32,
+            "val_split": 0.2,
+            "batch_size": 2,
+            "num_workers": 0,
+        },
+        "model": {"name": "resnet18", "pretrained": False},
+    }
+    config_path = tmp_path / "smoke.yaml"
+    config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+    return config_path
+
+
+def test_smoke_pipeline_returns_matching_nih_target_and_logit_shapes(tmp_path, capsys):
+    config_path = write_smoke_config(tmp_path)
+
+    result = run_smoke_test(config_path)
+
+    assert result.images_shape == (2, 3, 32, 32)
+    assert result.labels_shape == (2, NUM_CLASSES)
+    assert result.logits_shape == result.labels_shape
+    assert isfinite(result.loss)
+    assert result.loss >= 0
+    assert "logits.dtype=torch.float32" in capsys.readouterr().out

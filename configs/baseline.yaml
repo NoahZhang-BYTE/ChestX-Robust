@@ -4,9 +4,9 @@ output_dir: checkpoints/baseline
 
 data:
   csv_path: data/labels.csv
-  image_root: data/images
-  image_col: image
-  # Leave empty to infer every CSV column except image_col.
+  image_root: data/raw/images
+  image_col: path
+  # Leave empty to select the canonical NIH ChestX-ray14 labels.
   label_cols: []
   image_size: 224
   val_split: 0.2

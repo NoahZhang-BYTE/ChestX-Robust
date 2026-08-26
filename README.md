@@ -1,25 +1,24 @@
 # Chest X-ray Multi-label Baseline
 
-This is a minimal, configurable baseline for a hidden-test-set medical image competition. The official input/output contract is not published yet, so the training CSV schema is deliberately configurable.
+This is a minimal, configurable baseline for a hidden-test-set medical image competition. It includes an adapter for prepared NIH ChestX-ray14 metadata.
 
 ## Expected local data
 
 ```text
 data/
   labels.csv
-  images/
-    image_001.png
+  raw/images/
+    images_001/image_00001.png
 ```
 
-`labels.csv` must contain one image path column (default `image`) and one binary column per finding:
+The default configuration expects `labels.csv` with a relative `path` column and the canonical NIH disease columns:
 
 ```csv
-image,atelectasis,effusion
-image_001.png,0,1
-image_002.png,1,0
+image_id,path,split,patient_id,Atelectasis,Cardiomegaly,...,Hernia
+00000001_000.png,images_001/00000001_000.png,train,1,0,1,...,0
 ```
 
-Set `data.label_cols` in `configs/baseline.yaml` to an explicit ordered list when the competition labels are known. Leave it empty to infer all columns except `image_col`.
+Leave `data.label_cols` empty to select the canonical 14 NIH labels from a prepared CSV. Set it to an explicit ordered list for a different dataset schema.
 
 ## Install and verify
 
@@ -33,6 +32,26 @@ Install the CUDA PyTorch build appropriate for the machine when creating a new e
 
 ```powershell
 uv pip install --python '.\.venv\Scripts\python.exe' torch torchvision --index-url https://download.pytorch.org/whl/cu128
+```
+
+## Prepare NIH data
+
+Download the NIH image archives and `Data_Entry_2017.csv`, extract images below `data/raw/images`, then run:
+
+```powershell
+& '.\.venv\Scripts\python.exe' prepare_nih.py --metadata data/raw/Data_Entry_2017.csv --image-root data/raw/images --output data/labels.csv
+```
+
+Validate the prepared metadata and image paths:
+
+```powershell
+& '.\.venv\Scripts\python.exe' validate_data.py --csv data/labels.csv --data-root data/raw/images
+```
+
+Run one CPU or CUDA batch through the loader, model, and loss before training:
+
+```powershell
+& '.\.venv\Scripts\python.exe' smoke_test.py --config configs/baseline.yaml
 ```
 
 ## Train
