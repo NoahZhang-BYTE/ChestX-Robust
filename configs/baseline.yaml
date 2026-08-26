@@ -1,0 +1,24 @@
+seed: 42
+device: auto
+output_dir: checkpoints/baseline
+
+data:
+  csv_path: data/labels.csv
+  image_root: data/images
+  image_col: image
+  # Leave empty to infer every CSV column except image_col.
+  label_cols: []
+  image_size: 224
+  val_split: 0.2
+  batch_size: 16
+  num_workers: 0
+
+model:
+  name: resnet18
+  pretrained: false
+
+training:
+  epochs: 10
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  threshold: 0.5
