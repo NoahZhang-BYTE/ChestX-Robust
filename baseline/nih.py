@@ -37,6 +37,8 @@ def _validate_labels_schema(frame: pd.DataFrame) -> None:
 
 
 def _validate_labels_content(frame: pd.DataFrame, data_root: str | Path) -> None:
+    if frame.empty:
+        raise ValueError("Labels CSV contains no rows")
     if frame.isna().any().any():
         raise ValueError("Labels CSV contains missing values")
     if frame["image_id"].duplicated().any():
