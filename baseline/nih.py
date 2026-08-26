@@ -43,7 +43,15 @@ def _validate_labels_content(frame: pd.DataFrame, data_root: str | Path) -> None
         raise ValueError("Duplicate image_id values are ambiguous")
     if not frame["split"].isin(_SPLITS).all():
         raise ValueError("Labels CSV contains an invalid split")
-    if not frame.loc[:, LABEL_COLUMNS].isin((0, 1)).all().all():
+    labels = frame.loc[:, LABEL_COLUMNS]
+    if (
+        any(
+            pd.api.types.is_bool_dtype(labels[label])
+            or not pd.api.types.is_numeric_dtype(labels[label])
+            for label in LABEL_COLUMNS
+        )
+        or not labels.isin((0, 1)).all().all()
+    ):
         raise ValueError("Label values must be 0 or 1")
 
     root = Path(data_root).resolve()

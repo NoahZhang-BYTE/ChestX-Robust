@@ -193,6 +193,16 @@ def test_validator_reports_zero_row_splits(tmp_path, capsys):
     assert output.count("0 / 0 = 0.0%") == 2 * NUM_CLASSES
 
 
+def test_validator_rejects_boolean_label_values(tmp_path):
+    labels_csv = prepare_fixture_labels_csv(tmp_path)
+    frame = pd.read_csv(labels_csv)
+    frame["Atelectasis"] = [True, False, True]
+    frame.to_csv(labels_csv, index=False)
+
+    with pytest.raises(ValueError, match="0 or 1"):
+        validate_labels_csv(labels_csv, tmp_path / "images")
+
+
 @pytest.mark.parametrize(
     ("mutate", "message"),
     [
