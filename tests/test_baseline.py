@@ -8,6 +8,7 @@ from PIL import Image
 
 from baseline.data import MultiLabelImageDataset, build_dataloaders
 from baseline.engine import save_checkpoint
+from baseline.labels import LABEL_COLUMNS, NUM_CLASSES
 from baseline.metrics import multilabel_metrics
 from baseline.models import build_model
 
@@ -21,6 +22,15 @@ def _fixture_csv(tmp_path: Path) -> Path:
     csv_path = tmp_path / "labels.csv"
     pd.DataFrame(rows).to_csv(csv_path, index=False)
     return csv_path
+
+
+def test_nih_label_definition_has_the_fixed_14_class_order():
+    assert LABEL_COLUMNS == (
+        "Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass",
+        "Nodule", "Pneumonia", "Pneumothorax", "Consolidation", "Edema",
+        "Emphysema", "Fibrosis", "Pleural_Thickening", "Hernia",
+    )
+    assert NUM_CLASSES == 14
 
 
 def test_dataset_returns_image_and_multihot_target(tmp_path):
