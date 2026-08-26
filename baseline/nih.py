@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import numpy as np
 import pandas as pd
@@ -12,6 +12,89 @@ from baseline.labels import LABEL_COLUMNS
 
 _METADATA_COLUMNS = ("Image Index", "Finding Labels", "Patient ID")
 _OUTPUT_COLUMNS = ("image_id", "path", "split", "patient_id", *LABEL_COLUMNS)
+_SPLITS = ("train", "val", "test")
+
+
+def validate_labels_csv(csv_path: str | Path, data_root: str | Path) -> pd.DataFrame:
+    """Validate a prepared labels CSV and print split-level label statistics."""
+    try:
+        frame = pd.read_csv(csv_path)
+    except (OSError, pd.errors.EmptyDataError, pd.errors.ParserError) as error:
+        raise ValueError(f"Could not read labels CSV: {csv_path}") from error
+
+    _validate_labels_schema(frame)
+    _validate_labels_content(frame, data_root)
+    _print_split_statistics(frame)
+    return frame
+
+
+def _validate_labels_schema(frame: pd.DataFrame) -> None:
+    columns = tuple(frame.columns)
+    if columns != _OUTPUT_COLUMNS:
+        if set(columns) != set(_OUTPUT_COLUMNS):
+            raise ValueError("Labels CSV must contain exactly the required columns")
+        raise ValueError("Labels CSV columns must be in the required order")
+
+
+def _validate_labels_content(frame: pd.DataFrame, data_root: str | Path) -> None:
+    if frame.isna().any().any():
+        raise ValueError("Labels CSV contains missing values")
+    if frame["image_id"].duplicated().any():
+        raise ValueError("Duplicate image_id values are ambiguous")
+    if not frame["split"].isin(_SPLITS).all():
+        raise ValueError("Labels CSV contains an invalid split")
+    if not frame.loc[:, LABEL_COLUMNS].isin((0, 1)).all().all():
+        raise ValueError("Label values must be 0 or 1")
+
+    root = Path(data_root).resolve()
+    if not root.is_dir():
+        raise ValueError(f"Data root does not exist or is not a directory: {root}")
+    for value in frame["path"]:
+        _validate_image_path(value, root)
+    _validate_patient_splits(frame)
+
+
+def _validate_image_path(value: object, data_root: Path) -> None:
+    path_value = str(value)
+    relative_path = PurePosixPath(path_value)
+    if (
+        "\\" in path_value
+        or relative_path.is_absolute()
+        or ".." in relative_path.parts
+    ):
+        raise ValueError(f"Invalid relative path: {path_value}")
+
+    resolved_path = (data_root / relative_path).resolve()
+    try:
+        resolved_path.relative_to(data_root)
+    except ValueError as error:
+        raise ValueError(f"Invalid relative path: {path_value}") from error
+    if not resolved_path.is_file():
+        raise ValueError(f"Image path does not exist: {path_value}")
+
+
+def _validate_patient_splits(frame: pd.DataFrame) -> None:
+    patients_by_split = {
+        split: set(frame.loc[frame["split"].eq(split), "patient_id"])
+        for split in _SPLITS
+    }
+    for index, first_split in enumerate(_SPLITS):
+        for second_split in _SPLITS[index + 1 :]:
+            if patients_by_split[first_split].intersection(patients_by_split[second_split]):
+                raise ValueError(
+                    f"Patient leakage between {first_split} and {second_split} splits"
+                )
+
+
+def _print_split_statistics(frame: pd.DataFrame) -> None:
+    for split in _SPLITS:
+        subset = frame.loc[frame["split"].eq(split)]
+        total = len(subset)
+        print(f"{split.title()}: {total} images")
+        for label in LABEL_COLUMNS:
+            positive = int(subset[label].sum())
+            percentage = (positive / total * 100) if total else 0.0
+            print(f"  {label}: {positive} / {total} = {percentage:.1f}%")
 
 
 def prepare_nih_metadata(

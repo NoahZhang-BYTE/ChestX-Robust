@@ -1,10 +1,12 @@
 from pathlib import Path
+import subprocess
+import sys
 
 import pandas as pd
 import pytest
 
 from baseline.labels import LABEL_COLUMNS, NUM_CLASSES
-from baseline.nih import prepare_nih_metadata
+from baseline.nih import prepare_nih_metadata, validate_labels_csv
 
 
 def _write_image(path: Path) -> None:
@@ -132,3 +134,114 @@ def test_prepare_nih_keeps_a_single_patient_in_train(tmp_path):
     frame = prepare_nih_metadata(metadata, image_root, tmp_path / "labels.csv")
 
     assert frame.split.tolist() == ["train"]
+
+
+def prepare_fixture_labels_csv(tmp_path: Path) -> Path:
+    image_root = tmp_path / "images"
+    _write_image(image_root / "nested" / "a.png")
+    _write_image(image_root / "nested" / "b.png")
+    _write_image(image_root / "nested" / "c.png")
+    frame = pd.DataFrame(
+        {
+            "image_id": ["a.png", "b.png", "c.png"],
+            "path": ["nested/a.png", "nested/b.png", "nested/c.png"],
+            "split": ["train", "val", "test"],
+            "patient_id": [1, 2, 3],
+        }
+    )
+    for label in LABEL_COLUMNS:
+        frame[label] = 0
+    frame.loc[0, "Atelectasis"] = 1
+    labels_csv = tmp_path / "labels.csv"
+    frame.to_csv(labels_csv, index=False)
+    return labels_csv
+
+
+def test_validator_reports_all_splits_and_labels_and_rejects_patient_leakage(tmp_path, capsys):
+    labels_csv = prepare_fixture_labels_csv(tmp_path)
+
+    returned = validate_labels_csv(labels_csv, tmp_path / "images")
+
+    assert returned.equals(pd.read_csv(labels_csv))
+    output = capsys.readouterr().out
+    assert "Train: 1 images" in output
+    assert "Val: 1 images" in output
+    assert "Test: 1 images" in output
+    assert "Atelectasis: 1 / 1 = 100.0%" in output
+    assert "Cardiomegaly: 0 / 1 = 0.0%" in output
+    for label in LABEL_COLUMNS:
+        assert f"{label}:" in output
+
+    leaked = pd.read_csv(labels_csv)
+    leaked.loc[1, "patient_id"] = 1
+    leaked.to_csv(labels_csv, index=False)
+    with pytest.raises(ValueError, match="Patient leakage"):
+        validate_labels_csv(labels_csv, tmp_path / "images")
+
+
+def test_validator_reports_zero_row_splits(tmp_path, capsys):
+    labels_csv = prepare_fixture_labels_csv(tmp_path)
+    frame = pd.read_csv(labels_csv)
+    frame["split"] = "train"
+    frame.to_csv(labels_csv, index=False)
+
+    validate_labels_csv(labels_csv, tmp_path / "images")
+
+    output = capsys.readouterr().out
+    assert "Val: 0 images" in output
+    assert "Test: 0 images" in output
+    assert output.count("0 / 0 = 0.0%") == 2 * NUM_CLASSES
+
+
+@pytest.mark.parametrize(
+    ("mutate", "message"),
+    [
+        (lambda frame: frame.drop(columns="Hernia"), "required columns"),
+        (lambda frame: frame.assign(extra=1), "exactly"),
+        (lambda frame: frame.assign(Atelectasis=2), "0 or 1"),
+        (lambda frame: frame.assign(split="development"), "split"),
+        (lambda frame: frame.assign(image_id="a.png"), "Duplicate image_id"),
+        (lambda frame: frame.assign(path="../outside.png"), "relative path"),
+        (
+            lambda frame: frame.assign(path="C:/absolute/path.png"),
+            "relative path",
+        ),
+        (lambda frame: frame.assign(path="missing.png"), "does not exist"),
+        (
+            lambda frame: frame.assign(
+                patient_id=frame["patient_id"].mask(frame.index == 0)
+            ),
+            "missing values",
+        ),
+    ],
+)
+def test_validator_rejects_malformed_labels_csv(tmp_path, mutate, message):
+    labels_csv = prepare_fixture_labels_csv(tmp_path)
+    frame = mutate(pd.read_csv(labels_csv))
+    frame.to_csv(labels_csv, index=False)
+
+    with pytest.raises(ValueError, match=message):
+        validate_labels_csv(labels_csv, tmp_path / "images")
+
+
+def test_validate_data_cli_validates_csv_and_prints_statistics(tmp_path):
+    labels_csv = prepare_fixture_labels_csv(tmp_path)
+    project_root = Path(__file__).resolve().parents[1]
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "validate_data.py",
+            "--csv",
+            str(labels_csv),
+            "--data-root",
+            str(tmp_path / "images"),
+        ],
+        cwd=project_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "Train: 1 images" in result.stdout
