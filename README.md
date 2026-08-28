@@ -1,4 +1,6 @@
-# Chest X-ray Multi-label Baseline
+# ChestX-Robust
+
+A project aiming at developing robust multi-label chest X-ray classification models that generalize reliably across datasets, acquisition settings, and hidden test environments. It provides a configurable baseline built on the NIH ChestX-ray14 dataset, with reproducible data preparation, training, validation, and evaluation workflows.
 
 This is a minimal, configurable baseline for a hidden-test-set medical image competition. It includes an adapter for prepared NIH ChestX-ray14 metadata.
 
