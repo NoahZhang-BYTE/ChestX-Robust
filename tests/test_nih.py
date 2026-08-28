@@ -9,7 +9,7 @@ import yaml
 from PIL import Image
 
 from baseline.labels import LABEL_COLUMNS, NUM_CLASSES
-from baseline.nih import prepare_nih_metadata, validate_labels_csv
+from baseline.nih import _split_patients, prepare_nih_metadata, validate_labels_csv
 from smoke_test import run_smoke_test
 
 
@@ -138,6 +138,13 @@ def test_prepare_nih_keeps_a_single_patient_in_train(tmp_path):
     frame = prepare_nih_metadata(metadata, image_root, tmp_path / "labels.csv")
 
     assert frame.split.tolist() == ["train"]
+
+
+def test_patient_splitting_preserves_mixed_patient_id_types():
+    splits = _split_patients([1, "patient-2"], seed=42)
+
+    assert len(splits) == 2
+    assert set(splits) == {"train", "test"}
 
 
 def prepare_fixture_labels_csv(tmp_path: Path) -> Path:

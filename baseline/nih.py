@@ -39,11 +39,11 @@ def _validate_labels_schema(frame: pd.DataFrame) -> None:
 def _validate_labels_content(frame: pd.DataFrame, data_root: str | Path) -> None:
     if frame.empty:
         raise ValueError("Labels CSV contains no rows")
-    if frame.isna().any().any():
+    if bool(frame.isna().to_numpy().any()):
         raise ValueError("Labels CSV contains missing values")
     if frame["image_id"].duplicated().any():
         raise ValueError("Duplicate image_id values are ambiguous")
-    if not frame["split"].isin(_SPLITS).all():
+    if not bool(frame["split"].isin(_SPLITS).to_numpy().all()):
         raise ValueError("Labels CSV contains an invalid split")
     labels = frame.loc[:, LABEL_COLUMNS]
     if (
@@ -141,7 +141,7 @@ def prepare_nih_metadata(
     for label, values in zip(LABEL_COLUMNS, zip(*labels, strict=True)):
         frame[label] = values
 
-    frame = frame.loc[:, _OUTPUT_COLUMNS]
+    frame = frame.loc[:, list(_OUTPUT_COLUMNS)]
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     frame.to_csv(output_path, index=False)
@@ -196,10 +196,12 @@ def _assign_splits(
     train_list_path: str | Path | None,
     test_list_path: str | Path | None,
 ) -> list[str]:
-    if (train_list_path is None) != (test_list_path is None):
-        raise ValueError("train_list_path and test_list_path must be supplied together")
     if train_list_path is None:
-        return _split_patients(patient_ids, seed)
+        if test_list_path is None:
+            return _split_patients(patient_ids, seed)
+        raise ValueError("train_list_path and test_list_path must be supplied together")
+    if test_list_path is None:
+        raise ValueError("train_list_path and test_list_path must be supplied together")
 
     train_images = _read_image_list(Path(train_list_path))
     test_images = _read_image_list(Path(test_list_path))
@@ -266,4 +268,5 @@ def _split_train_patients(patient_ids: list[object], seed: int) -> dict[object, 
 
 def _shuffled_unique_patients(patient_ids: list[object], seed: int) -> list[object]:
     patients = sorted(set(patient_ids), key=lambda patient_id: str(patient_id))
-    return np.random.default_rng(seed).permutation(patients).tolist()
+    np.random.default_rng(seed).shuffle(patients)
+    return patients
