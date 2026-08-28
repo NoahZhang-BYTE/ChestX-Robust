@@ -10,8 +10,10 @@ data:
   label_cols: []
   image_size: 224
   val_split: 0.2
-  batch_size: 16
-  num_workers: 0
+  batch_size: 64
+  num_workers: 4
+  prefetch_factor: 2
+  persistent_workers: true
 
 model:
   name: resnet18
@@ -22,3 +24,4 @@ training:
   learning_rate: 0.0003
   weight_decay: 0.0001
   threshold: 0.5
+  amp: true

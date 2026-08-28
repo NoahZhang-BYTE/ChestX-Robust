@@ -64,6 +64,8 @@ Run one CPU or CUDA batch through the loader, model, and loss before training:
 
 The default backbone is ResNet18. Set `model.name` to `densenet121` to use DenseNet121. The loss is `BCEWithLogitsLoss`; logits are converted to probabilities with sigmoid for metrics.
 
+For CUDA training, the default configuration uses AMP mixed precision, pinned-memory non-blocking transfers, four persistent data-loader workers, and a batch size of 64. If GPU memory is exhausted, lower `data.batch_size` to 32 or 16; if GPU utilization remains low, increase `data.num_workers` gradually (typically up to the number of physical CPU cores).
+
 Each run writes `last.pt` and the best validation checkpoint `best.pt` under `output_dir`. Checkpoints contain model and optimizer states, epoch, resolved configuration, and validation metrics.
 
 ## Validate

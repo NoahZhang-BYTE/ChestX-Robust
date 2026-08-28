@@ -77,6 +77,8 @@ def build_dataloaders(
     image_size: int = 224,
     batch_size: int = 16,
     num_workers: int = 0,
+    prefetch_factor: int = 2,
+    persistent_workers: bool = True,
     seed: int = 42,
 ) -> tuple[DataLoader, DataLoader, list[str]]:
     frame = pd.read_csv(csv_path)
@@ -110,7 +112,13 @@ def build_dataloaders(
     )
     train_dataset = MultiLabelImageDataset(train_frame, image_root, image_col, label_cols, train_transform)
     val_dataset = MultiLabelImageDataset(val_frame, image_root, image_col, label_cols, val_transform)
+    if num_workers < 0:
+        raise ValueError("num_workers must be non-negative")
+    if prefetch_factor < 1:
+        raise ValueError("prefetch_factor must be at least 1")
     loader_kwargs = {"batch_size": batch_size, "num_workers": num_workers, "pin_memory": torch.cuda.is_available()}
+    if num_workers:
+        loader_kwargs.update(prefetch_factor=prefetch_factor, persistent_workers=persistent_workers)
     return (
         DataLoader(train_dataset, shuffle=True, **loader_kwargs),
         DataLoader(val_dataset, shuffle=False, **loader_kwargs),

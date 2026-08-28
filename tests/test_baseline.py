@@ -109,6 +109,23 @@ def test_dataloaders_use_persisted_train_and_val_splits(tmp_path):
     assert label_cols == ["finding_a", "finding_b"]
 
 
+def test_dataloaders_prefetch_when_workers_are_enabled(tmp_path):
+    csv_path = _fixture_csv(tmp_path)
+
+    train_loader, _, _ = build_dataloaders(
+        csv_path=csv_path,
+        image_root=tmp_path,
+        image_col="image",
+        label_cols=["finding_a", "finding_b"],
+        batch_size=2,
+        num_workers=2,
+        prefetch_factor=3,
+    )
+
+    assert train_loader.persistent_workers is True
+    assert train_loader.prefetch_factor == 3
+
+
 def test_metrics_handle_single_class_label_without_crashing():
     targets = np.array([[1, 0], [1, 0]])
     probabilities = np.array([[0.9, 0.2], [0.8, 0.1]])

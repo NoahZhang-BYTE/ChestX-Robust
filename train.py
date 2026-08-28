@@ -36,6 +36,8 @@ def main() -> None:
     config = load_config(args.config)
     _set_seed(int(config.get("seed", 42)))
     device = _resolve_device(config.get("device", "auto"))
+    if device.type == "cuda":
+        torch.backends.cudnn.benchmark = True
 
     data_config = config["data"]
     train_loader, val_loader, label_cols = build_dataloaders(**data_config)
@@ -43,6 +45,8 @@ def main() -> None:
     model_config = config["model"]
     model = build_model(model_config["name"], len(label_cols), bool(model_config.get("pretrained", False)))
     model.to(device)
+    if device.type == "cuda":
+        model.to(memory_format=torch.channels_last)
     print(f"device={device} labels={label_cols} parameters={sum(p.numel() for p in model.parameters()):,}")
     fit(model, train_loader, val_loader, config, device)
 
