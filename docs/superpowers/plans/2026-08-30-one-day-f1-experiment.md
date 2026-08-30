@@ -30,7 +30,9 @@
 - The two new runs set `deterministic: true`: seed Python/NumPy/PyTorch, set
   `torch.backends.cudnn.benchmark = False`, set
   `torch.backends.cudnn.deterministic = True`, and call
-  `torch.use_deterministic_algorithms(True)`. If a documented CUDA operator
+  `torch.use_deterministic_algorithms(True)`. Before importing/initializing
+  CUDA, set `CUBLAS_WORKSPACE_CONFIG=:4096:8` (use `:16:8` only if the runtime
+  documents that variant) in the process environment. If a documented CUDA operator
   exception forces a relaxation, record the exact warning and setting in the
   run metadata; never silently leave `benchmark=True` for one arm only.
 - Checkpoints, reports, and generated artifacts go under `D:/ChestXRobustRuns` or the repository; never write checkpoints to the removable drive.
@@ -96,13 +98,16 @@ Every `powershell` block implicitly starts with this PowerShell 7.6 prologue:
 ~~~powershell
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
+$env:CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 ~~~
 
 Thus a non-zero Python, pytest, or git exit stops that step and all dependent
 steps. The only intentional non-zero commands are the explicitly labeled
 red-phase tests; run their following implementation step in a fresh shell after
 confirming the expected failure. Never commit or advance a gate after an
-unexpected native-command failure.
+unexpected native-command failure. A deterministic Python entry point must also
+execute `os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")` before its
+`import torch` (the PowerShell setting is the primary guarantee for subprocesses).
 
 ## External Dataset Triage
 
@@ -508,6 +513,7 @@ def tiny_bundle(tmp_path, config_labels, checkpoint_labels):
             "labels_csv_sha256": sha256_file(csv_path),
             "deterministic": False, "cudnn_benchmark": False,
             "cudnn_deterministic": False, "deterministic_algorithms": False,
+            "cublas_workspace_config": ":4096:8",
             "elapsed_seconds": 0.0, "stop_reason": "completed",
         },
     }, checkpoint_path)
@@ -1067,6 +1073,34 @@ In a second test, patch `time.monotonic` so `max_hours` is exceeded after the
 first completed epoch and assert the loop stops before epoch 2. Read
 `history.json` after each mocked epoch and assert it is complete JSON; implement
 this by writing `history.json.tmp` and replacing `history.json` atomically.
+Add this fresh-process CUDA smoke test (skip only when CUDA is unavailable):
+
+~~~python
+import os
+import subprocess
+import sys
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
+def test_deterministic_cuda_one_batch_smoke():
+    code = r'''
+import os
+os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+import torch
+from baseline.models import build_model
+torch.use_deterministic_algorithms(True)
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
+model = build_model("resnet18", 2, pretrained=False).to("cuda")
+images = torch.randn(2, 3, 32, 32, device="cuda")
+targets = torch.ones(2, 2, device="cuda")
+loss = torch.nn.BCEWithLogitsLoss()(model(images), targets)
+loss.backward()
+assert torch.isfinite(loss)
+'''
+    env = os.environ.copy()
+    env["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+    subprocess.run([sys.executable, "-c", code], check=True, env=env)
+~~~
 
 Run: `& ".venv/Scripts/python.exe" -m pytest tests/test_engine.py -q`
 Expected: FAIL because the current engine always selects macro AUROC and has no
@@ -1095,8 +1129,8 @@ exactly these required fields: `loss_name`, `positive_counts`,
 `negative_counts`, `pos_weight`, `selection_metric`, `patience`, `min_delta`,
 `max_hours`, `source_config`, `source_config_sha256`, `labels_csv`,
 `labels_csv_sha256`, `deterministic`, `cudnn_benchmark`,
-`cudnn_deterministic`, `deterministic_algorithms`, `elapsed_seconds`, and
-`stop_reason`;
+`cudnn_deterministic`, `deterministic_algorithms`,
+`cublas_workspace_config`, `elapsed_seconds`, and `stop_reason`;
 count/weight fields are `null` for plain BCE and 14 finite values for
 `bce_pos_weight`. Save `history.json` atomically after every epoch with this
 envelope:
@@ -1122,6 +1156,7 @@ envelope:
     "cudnn_benchmark": false,
     "cudnn_deterministic": true,
     "deterministic_algorithms": true,
+    "cublas_workspace_config": ":4096:8",
     "elapsed_seconds": 12.5,
     "stop_reason": "running"
   },
@@ -1160,6 +1195,11 @@ new or empty directory. Write each checkpoint through
 asserts no checkpoint or history byte changes.
 When `config.get("deterministic", False)` is true, `_set_seed` applies the
 deterministic policy above and `train.py` must not enable cuDNN benchmarking.
+Place `os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")` before the
+first `import torch` in `train.py` and `smoke_test.py`; inside `_set_seed`, set
+the cuDNN flags and call `torch.use_deterministic_algorithms(True)` before any
+`torch.cuda.manual_seed_all` call. The subprocess smoke test proves the final
+linear layer does not fail under the selected cuBLAS workspace setting.
 Legacy configs default to `False`, preserving their historical runtime behavior.
 Record the four deterministic flags in `run_metadata` exactly as observed after
 initialization, so a relaxed CUDA run cannot be mistaken for the matched arm.
@@ -1288,7 +1328,8 @@ the protocol provenance header.
 - [ ] **Step 4: Freeze configs and protocol after the plan commit, before any acceptance training**
 
 ~~~powershell
-git rev-parse --verify HEAD
+git log -1 --format=%H -- docs/superpowers/plans/2026-08-30-one-day-f1-experiment.md
+git diff --quiet -- docs/superpowers/plans/2026-08-30-one-day-f1-experiment.md
 git add configs/nih_f1_bce.yaml configs/nih_f1_posweight.yaml docs/experiments/2026-08-30-nih-f1-run.md docs/experiments/2026-08-30-input-inventory.json
 git commit -m "docs: define controlled NIH F1 runs"
 ~~~
