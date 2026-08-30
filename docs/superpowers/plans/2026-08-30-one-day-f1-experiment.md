@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a leakage-safe NIH F1 training/evaluation loop, compare ordinary BCE with training-set-derived `pos_weight`, and verify CheXpert-small readiness on the U drive without deleting or replacing NIH data.
+**Goal:** Build a leakage-safe NIH F1 training/evaluation loop, compare ordinary BCE with training-set-derived `pos_weight`, and verify CheXpert-small readiness on the removable USB drive without deleting or replacing NIH data.
 
 **Architecture:** Keep the existing NIH data and ImageNet-initialized ResNet18 as the reference. Add pure metric/threshold utilities, a named persisted-split loader, a separate evaluation path, and a small configurable loss factory. Training selects `best.pt` by validation macro AUPRC, thresholds are fitted once on validation for that frozen checkpoint, and only then is a final NIH test batch generated. CheXpert work is limited to a read-only staging preflight; no external labels are converted and no external model is trained in this plan.
 
@@ -35,12 +35,27 @@
   documents that variant) in the process environment. If a documented CUDA operator
   exception forces a relaxation, record the exact warning and setting in the
   run metadata; never silently leave `benchmark=True` for one arm only.
-- Checkpoints, reports, and generated artifacts go under `D:/ChestXRobustRuns` or the repository; never write checkpoints to the removable drive.
+  Also set `torch.backends.cuda.matmul.allow_tf32 = False` and
+  `torch.backends.cudnn.allow_tf32 = False` in the deterministic branch; AMP
+  remains enabled for the matched arms and results are described as
+  algorithmically deterministic with a documented numeric tolerance, not as a
+  bitwise identity guarantee.
+- ImageNet initialization is pinned to `torchvision.models.ResNet18_Weights.DEFAULT`.
+  Before smoke/training, require the exact cached weight file and record its URL,
+  cache path, SHA-256, and torchvision version; do not allow an implicit network
+  download. If the cache is absent, mark the run blocked rather than changing
+  one arm's initialization.
+- Checkpoints, reports, and generated artifacts go under `D:/ChestXRobustRuns` or the repository; never write checkpoints to the removable drive. Every generated file and directory is write-once: an existing target is a hard stop unless a separately approved, explicit resume/force mode exists. The registered protocol is the sole append-only exception, and its decision text remains immutable.
 - Training output directories are write-once too: `fit`/`train.py` must reject
-  an existing non-empty directory unless an explicit, out-of-scope `--resume`
-  mode is added in a separately approved change. Check this in Python, not only
-  in the surrounding PowerShell script.
+  any existing output-directory path (empty or non-empty) unless an explicit,
+  out-of-scope `--resume` mode is added in a separately approved change. Check
+  this in Python, not only in the surrounding PowerShell script.
 - CheXpert is only a preflight target at `E:/ChestXRobustData/CheXpert-v1.0-small`; no download is assumed to be authorized, and no external robustness claim may be made from a preflight.
+- Day-one evidence can establish an F1 mechanism and external-data readiness,
+  not domain robustness: no corrupted-input or external-model inference is in
+  scope. The next robustness experiment must consume the frozen selected
+  checkpoint and thresholds on BRAX or VinDr-CXR (or a separately registered
+  CheXpert evaluation) without reopening NIH test-driven choices.
 - Existing NIH tests must remain green. New tests use tiny synthetic PNG/JPG fixtures and must not require the NIH image corpus or an internet connection.
 
 ## Frozen Input Inventory
@@ -99,6 +114,20 @@ Every `powershell` block implicitly starts with this PowerShell 7.6 prologue:
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
 $env:CUBLAS_WORKSPACE_CONFIG = ":4096:8"
+function Assert-CommitPaths([string[]] $Expected, [string] $Commit = "HEAD") {
+    $actual = @(git diff-tree --no-commit-id --name-only -r $Commit | Where-Object { $_ } | Sort-Object)
+    $wanted = @($Expected | Sort-Object)
+    if (($actual -join "`n") -ne ($wanted -join "`n")) {
+        throw "Last commit contains unexpected paths: $($actual -join ', ')"
+    }
+}
+function Assert-StagedPaths([string[]] $Expected) {
+    $actual = @(git diff --cached --name-only | Where-Object { $_ } | Sort-Object)
+    $wanted = @($Expected | Sort-Object)
+    if (($actual -join "`n") -ne ($wanted -join "`n")) {
+        throw "Index contains unexpected paths: $($actual -join ', ')"
+    }
+}
 ~~~
 
 Thus a non-zero Python, pytest, or git exit stops that step and all dependent
@@ -168,7 +197,10 @@ an old local listing.
 The plan is a decision boundary, so commit it before executing Task 1 or
 running any implementation, smoke, or training command. Preserve the separate
 untracked `docs/superpowers/plans/2026-08-29-external-dataset-migration.md` and
-do not stage it.
+any other unrelated untracked plan, and do not stage them. A clean existing
+commit containing this file may satisfy the
+gate; otherwise create one commit containing only this plan. A rerun must never
+silently overwrite a changed plan or create a duplicate empty commit.
 
 - [ ] **Step 1: Verify and commit only this plan**
 
@@ -176,13 +208,36 @@ do not stage it.
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $true
 git diff --check -- docs/superpowers/plans/2026-08-30-one-day-f1-experiment.md
-git add docs/superpowers/plans/2026-08-30-one-day-f1-experiment.md
-git commit -m "docs: freeze one-day F1 implementation plan"
-git rev-parse HEAD
+$planPath = "docs/superpowers/plans/2026-08-30-one-day-f1-experiment.md"
+if (-not (Test-Path -LiteralPath $planPath -PathType Leaf)) {
+    throw "Frozen plan path is missing."
+}
+$planCommit = (git log -1 --format=%H -- $planPath).Trim()
+if ($planCommit -match '^[0-9a-f]{40}$' -and -not (git status --porcelain -- $planPath)) {
+    Assert-CommitPaths @($planPath) $planCommit
+    Write-Output "Task 0 already satisfied by $planCommit"
+} else {
+    # Do not use `git diff --cached --quiet`: exit 1 is a normal result and the
+    # native-command error policy above would turn it into an exception.
+    $cached = @(git diff --cached --name-only | Where-Object { $_ })
+    if ($cached.Count -ne 0) {
+        throw "Unrelated files are already staged; clear the index before Task 0."
+    }
+    git add -- $planPath
+    Assert-StagedPaths @($planPath)
+    git commit --only -m "docs: freeze one-day F1 implementation plan" -- $planPath
+    $planCommit = (git log -1 --format=%H -- $planPath).Trim()
+    if ($planCommit -notmatch '^[0-9a-f]{40}$') {
+        throw "The new plan commit hash is invalid."
+    }
+    Assert-CommitPaths @($planPath) $planCommit
+    Write-Output "Task 0 committed as $planCommit"
+}
 ~~~
 
-Expected: one new commit containing only this plan. Record its printed hash as
-`plan_commit` in the Task 5 protocol before the protocol/config freeze commit.
+Expected: either a clean verification of the existing plan commit or one new
+commit containing only this plan. Record the verified hash as `plan_commit` in
+the Task 5 protocol before the protocol/config freeze commit.
 
 ---
 
@@ -302,8 +357,10 @@ Expected: all new tests and existing metric tests pass.
 - [ ] **Step 4: Commit**
 
 ~~~powershell
-git add baseline/metrics.py tests/test_metrics_thresholds.py tests/test_baseline.py
-git commit -m "feat: add validation-only threshold metrics"
+git add -- baseline/metrics.py tests/test_metrics_thresholds.py tests/test_baseline.py
+Assert-StagedPaths @("baseline/metrics.py", "tests/test_metrics_thresholds.py", "tests/test_baseline.py")
+git commit --only -m "feat: add validation-only threshold metrics" -- baseline/metrics.py tests/test_metrics_thresholds.py tests/test_baseline.py
+Assert-CommitPaths @("baseline/metrics.py", "tests/test_metrics_thresholds.py", "tests/test_baseline.py")
 ~~~
 
 ---
@@ -418,8 +475,10 @@ Expected: PASS with no change to NIH adapter behavior.
 - [ ] **Step 4: Commit**
 
 ~~~powershell
-git add baseline/data.py tests/test_split_loader.py
-git commit -m "feat: load persisted evaluation splits"
+git add -- baseline/data.py tests/test_split_loader.py
+Assert-StagedPaths @("baseline/data.py", "tests/test_split_loader.py")
+git commit --only -m "feat: load persisted evaluation splits" -- baseline/data.py tests/test_split_loader.py
+Assert-CommitPaths @("baseline/data.py", "tests/test_split_loader.py")
 ~~~
 
 ---
@@ -514,6 +573,11 @@ def tiny_bundle(tmp_path, config_labels, checkpoint_labels):
             "deterministic": False, "cudnn_benchmark": False,
             "cudnn_deterministic": False, "deterministic_algorithms": False,
             "cublas_workspace_config": ":4096:8",
+            "tf32_matmul": False, "tf32_cudnn": False,
+            "imagenet_weights_url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+            "imagenet_weights_path": None,
+            "imagenet_weights_sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+            "torchvision_version": "0.26.0+cu128",
             "elapsed_seconds": 0.0, "stop_reason": "completed",
         },
     }, checkpoint_path)
@@ -949,11 +1013,13 @@ validates these four JSON files plus `manifest.json` inside a unique sibling
 staging directory:
 `nih-f1-reference-test-fixed.json`, `nih-f1-reference-test-tuned.json`,
 `nih-f1-selected-test-fixed.json`, and `nih-f1-selected-test-tuned.json`.
-The manifest records every report SHA-256. Immediately before promotion,
-recheck that the final directory is absent, then publish the entire batch with
-one same-volume directory rename. If authorization, inference, validation, or
-promotion fails, exit 2, remove only the newly-created staging directory, and
-leave the final directory absent. Add tests for
+The manifest records every report SHA-256, the host platform, and the exact
+directory-fsync status (`fsynced` or a documented Windows
+`unavailable:<ERROR_CODE>`). Immediately before promotion, recheck that the
+final directory is absent, then publish the entire batch with one same-volume
+directory rename. If authorization, inference, validation, or promotion fails,
+exit 2, remove only the newly-created staging directory, and leave the final
+directory absent. Add tests for
 missing record, changed checkpoint, changed threshold path, and successful four
 report generation from tiny fixtures. Add a test that pre-creates the final
 directory, asserts exit 2 before prediction collection, and verifies every
@@ -963,18 +1029,91 @@ that no final directory or staging directory remains.
 Implement the reusable `run_final_test_batch(record, output_dir)` with the same
 preconditions as the CLI: call `validate_selection_record`, reject an existing
 `output_dir`, create a unique sibling staging directory with `tempfile`, call
-the internal test evaluator four times (reference/selected x fixed/tuned),
-write `manifest.json` with SHA-256s, fsync each file and the staging directory,
-then call `staging_dir.replace(output_dir)` exactly once. On any exception,
-remove only that staging directory and re-raise a `ValueError`/`OSError` without
-touching an existing output directory.
+the internal test evaluator four times (reference/selected x fixed/tuned), and
+write `manifest.json` with SHA-256s. Persist files and the staging directory
+by writing each file to a temporary sibling, flushing and `os.fsync`-ing the
+file descriptor, then using this platform-specific directory helper rather than
+opening a Windows directory with `os.open(path, os.O_RDONLY)`:
+
+~~~python
+import ctypes
+import os
+
+
+def _win32_directory_handle(path):
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    create_file = kernel32.CreateFileW
+    create_file.restype = ctypes.c_void_p
+    handle = create_file(
+        str(path), 0x0001, 0x00000007, None, 3, 0x02000000, None
+    )
+    if handle in (None, ctypes.c_void_p(-1).value):
+        raise OSError(ctypes.get_last_error(), "CreateFileW failed")
+    return handle
+
+
+def fsync_directory(path):
+    if os.name != "nt":
+        fd = os.open(path, os.O_RDONLY)
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        return "fsynced"
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    flush_buffers = kernel32.FlushFileBuffers
+    close_handle = kernel32.CloseHandle
+    handle = _win32_directory_handle(path)
+    try:
+        if not flush_buffers(handle):
+            error = ctypes.get_last_error()
+            # NTFS commonly denies FlushFileBuffers on a directory handle even
+            # when all file handles have been flushed. Preserve the limitation
+            # in the manifest instead of turning a valid batch into a failure.
+            if error == 5:  # ERROR_ACCESS_DENIED
+                return "unavailable:5"
+            raise OSError(error, "FlushFileBuffers failed")
+    finally:
+        close_handle(handle)
+    return "fsynced"
+
+
+def atomic_promote(staging_dir, output_dir):
+    if os.name != "nt":
+        staging_dir.replace(output_dir)
+        return
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    move_file = kernel32.MoveFileExW
+    move_file.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint32]
+    move_file.restype = ctypes.c_int
+    # MOVEFILE_WRITE_THROUGH without REPLACE_EXISTING: a destination that
+    # appears after the preflight must fail rather than be clobbered.
+    flags = 0x00000008
+    if not move_file(str(staging_dir), str(output_dir), flags):
+        raise OSError(ctypes.get_last_error(), "MoveFileExW failed")
+~~~
+
+On Windows, `_win32_directory_handle` must call `CreateFileW` with
+`FILE_LIST_DIRECTORY` and `FILE_FLAG_BACKUP_SEMANTICS`; a failed handle or a
+flush error other than `ERROR_ACCESS_DENIED` is a hard error. When Windows
+returns `ERROR_ACCESS_DENIED`, retain the flushed files, record
+`directory_fsync: unavailable:5` and a durability warning in `manifest.json`,
+and continue with `atomic_promote` (which uses `MOVEFILE_WRITE_THROUGH`). On
+POSIX, directory fsync remains mandatory. Record the platform and the exact
+directory-fsync status before calling `atomic_promote` exactly once. On any
+exception, remove only that staging directory and re-raise a
+`ValueError`/`OSError` without touching an existing output directory. Add tests
+for the injected access-denied probe and for a promotion failure, asserting no
+final or staging directory remains.
 
 - [ ] **Step 6: Run focused tests and commit**
 
 ~~~powershell
 & ".venv/Scripts/python.exe" -m pytest tests/test_evaluation.py tests/test_metrics_thresholds.py -q
-git add baseline/evaluation.py evaluate.py tune_thresholds.py select_candidate.py run_final_test.py tests/test_evaluation.py
-git commit -m "feat: gate frozen checkpoint evaluation"
+git add -- baseline/evaluation.py evaluate.py tune_thresholds.py select_candidate.py run_final_test.py tests/test_evaluation.py
+Assert-StagedPaths @("baseline/evaluation.py", "evaluate.py", "tune_thresholds.py", "select_candidate.py", "run_final_test.py", "tests/test_evaluation.py")
+git commit --only -m "feat: gate frozen checkpoint evaluation" -- baseline/evaluation.py evaluate.py tune_thresholds.py select_candidate.py run_final_test.py tests/test_evaluation.py
+Assert-CommitPaths @("baseline/evaluation.py", "evaluate.py", "tune_thresholds.py", "select_candidate.py", "run_final_test.py", "tests/test_evaluation.py")
 ~~~
 
 Expected: PASS, including empty-list label resolution and programmatic refusal
@@ -1090,6 +1229,8 @@ from baseline.models import build_model
 torch.use_deterministic_algorithms(True)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
+torch.backends.cuda.matmul.allow_tf32 = False
+torch.backends.cudnn.allow_tf32 = False
 model = build_model("resnet18", 2, pretrained=False).to("cuda")
 images = torch.randn(2, 3, 32, 32, device="cuda")
 targets = torch.ones(2, 2, device="cuda")
@@ -1130,7 +1271,9 @@ exactly these required fields: `loss_name`, `positive_counts`,
 `max_hours`, `source_config`, `source_config_sha256`, `labels_csv`,
 `labels_csv_sha256`, `deterministic`, `cudnn_benchmark`,
 `cudnn_deterministic`, `deterministic_algorithms`,
-`cublas_workspace_config`, `elapsed_seconds`, and `stop_reason`;
+`cublas_workspace_config`, `tf32_matmul`, `tf32_cudnn`, `imagenet_weights_url`,
+`imagenet_weights_path`, `imagenet_weights_sha256`, `torchvision_version`,
+`elapsed_seconds`, and `stop_reason`;
 count/weight fields are `null` for plain BCE and 14 finite values for
 `bce_pos_weight`. Save `history.json` atomically after every epoch with this
 envelope:
@@ -1157,6 +1300,12 @@ envelope:
     "cudnn_deterministic": true,
     "deterministic_algorithms": true,
     "cublas_workspace_config": ":4096:8",
+    "tf32_matmul": false,
+    "tf32_cudnn": false,
+    "imagenet_weights_url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+    "imagenet_weights_path": "torch hub cache/checkpoints/resnet18-f37072fd.pth",
+    "imagenet_weights_sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+    "torchvision_version": "0.26.0+cu128",
     "elapsed_seconds": 12.5,
     "stop_reason": "running"
   },
@@ -1187,9 +1336,9 @@ run_provenance = {
 and on exit. Update
 `smoke_test.py` to construct the configured loss conditionally from the training
 frame and call `.to(device)`; default config still uses plain BCE.
-At the start of `fit`, reject an existing non-empty `output_dir` with
-`ValueError("output directory already exists and is non-empty")`; create only a
-new or empty directory. Write each checkpoint through
+At the start of `fit`, reject any existing `output_dir` path with
+`ValueError("output directory already exists")`; create only a path that was
+absent at the start. Write each checkpoint through
 `<name>.pt.tmp` followed by `Path.replace` so a crash cannot leave a truncated
 `best.pt`/`last.pt`. Add an engine test that pre-creates a marker file and
 asserts no checkpoint or history byte changes.
@@ -1198,18 +1347,28 @@ deterministic policy above and `train.py` must not enable cuDNN benchmarking.
 Place `os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")` before the
 first `import torch` in `train.py` and `smoke_test.py`; inside `_set_seed`, set
 the cuDNN flags and call `torch.use_deterministic_algorithms(True)` before any
-`torch.cuda.manual_seed_all` call. The subprocess smoke test proves the final
-linear layer does not fail under the selected cuBLAS workspace setting.
+`torch.cuda.manual_seed_all` call, and disable both TF32 flags. The subprocess
+smoke test proves the final linear layer does not fail under the selected cuBLAS
+workspace setting. Record `tf32_matmul` and `tf32_cudnn` in metadata.
+Before any `build_model(..., pretrained=True)` call, resolve
+`torch.hub.get_dir()/checkpoints/resnet18-f37072fd.pth`, require that it exists,
+verify the registered SHA-256, and pass the already-validated weight selection
+to the model builder. A missing or mismatched cache is a blocked run, not a
+network download or a silent switch to random initialization.
 Legacy configs default to `False`, preserving their historical runtime behavior.
-Record the four deterministic flags in `run_metadata` exactly as observed after
+Record all six deterministic/runtime flags (`cudnn_benchmark`,
+`cudnn_deterministic`, `deterministic_algorithms`, `tf32_matmul`, `tf32_cudnn`,
+and the CUBLAS workspace value) in `run_metadata` exactly as observed after
 initialization, so a relaxed CUDA run cannot be mistaken for the matched arm.
 
 - [ ] **Step 5: Run regression tests and commit**
 
 ~~~powershell
 & ".venv/Scripts/python.exe" -m pytest tests/test_losses.py tests/test_engine.py tests/test_baseline.py tests/test_nih.py -q
-git add baseline/losses.py baseline/engine.py train.py smoke_test.py tests/test_losses.py tests/test_engine.py
-git commit -m "feat: add imbalance loss and validation early stopping"
+git add -- baseline/losses.py baseline/engine.py train.py smoke_test.py tests/test_losses.py tests/test_engine.py
+Assert-StagedPaths @("baseline/losses.py", "baseline/engine.py", "train.py", "smoke_test.py", "tests/test_losses.py", "tests/test_engine.py")
+git commit --only -m "feat: add imbalance loss and validation early stopping" -- baseline/losses.py baseline/engine.py train.py smoke_test.py tests/test_losses.py tests/test_engine.py
+Assert-CommitPaths @("baseline/losses.py", "baseline/engine.py", "train.py", "smoke_test.py", "tests/test_losses.py", "tests/test_engine.py")
 ~~~
 
 ---
@@ -1226,6 +1385,18 @@ git commit -m "feat: add imbalance loss and validation early stopping"
 **Interfaces:** Both configs must be accepted by `train.py` and `smoke_test.py`.
 
 - [ ] **Step 1: Add ordinary BCE configuration**
+
+Before writing the configuration, verify that its target does not already
+exist. If it exists (tracked, untracked, or non-empty), stop and inspect the
+prior run rather than overwriting it; a completed prior freeze must be reused
+only after its hashes and commit are verified in a separate invocation.
+
+~~~powershell
+$path = "configs/nih_f1_bce.yaml"
+if (Test-Path -LiteralPath $path) {
+    throw "Configuration target already exists; refusing to overwrite $path."
+}
+~~~
 
 Create `configs/nih_f1_bce.yaml` with these exact values:
 
@@ -1264,6 +1435,15 @@ training:
 
 - [ ] **Step 2: Add the `pos_weight` configuration**
 
+Run the same write-once guard before creating the second file:
+
+~~~powershell
+$path = "configs/nih_f1_posweight.yaml"
+if (Test-Path -LiteralPath $path) {
+    throw "Configuration target already exists; refusing to overwrite $path."
+}
+~~~
+
 Create `configs/nih_f1_posweight.yaml` with every value above unchanged,
 `output_dir: D:/ChestXRobustRuns/nih_f1_posweight`, and:
 
@@ -1275,6 +1455,21 @@ Create `configs/nih_f1_posweight.yaml` with every value above unchanged,
 
 - [ ] **Step 3: Write the pre-registered, append-only protocol**
 
+Before creating either protocol artifact, assert that both targets are absent.
+If any target is present, treat the run as a prior/partial freeze and stop for
+manual verification; never truncate or replace an existing user file.
+
+~~~powershell
+$task5Targets = @(
+    "docs/experiments/2026-08-30-nih-f1-run.md",
+    "docs/experiments/2026-08-30-input-inventory.json"
+)
+$alreadyPresent = @($task5Targets | Where-Object { Test-Path -LiteralPath $_ })
+if ($alreadyPresent.Count -ne 0) {
+    throw "Task 5 target already exists; refusing to overwrite: $($alreadyPresent -join ', ')"
+}
+~~~
+
 Create `docs/experiments/2026-08-30-nih-f1-run.md` with separate headings
 `Validation selection`, `Final NIH test`, `CheXpert readiness`, and `Data safety`.
 Its provenance header must contain `plan_commit`, `config_commit`, and
@@ -1285,6 +1480,15 @@ appends the first freeze commit hash as `config_commit`; both commits must exist
 before any acceptance training. Protocol decision text is frozen before
 training; Task 7 appends measured result sections without rewriting the
 registered rules.
+
+Use this exact machine-readable header at the top of the protocol before the
+freeze commit, replacing only the two empty values with the printed values:
+
+~~~yaml
+plan_commit: ""
+config_commit: ""
+inventory_sha256: ""
+~~~
 The prescribed ordering is:
 
 1. Record git commit, Python/PyTorch/torchvision versions, GPU name, SHA-256 and
@@ -1321,6 +1525,13 @@ the protocol provenance header.
     "bytes": 134322153,
     "training_provenance": "legacy_unavailable"
   },
+  "imagenet_weights": {
+    "url": "https://download.pytorch.org/models/resnet18-f37072fd.pth",
+    "cache_name": "resnet18-f37072fd.pth",
+    "sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+    "bytes": 46830571,
+    "torchvision_version": "0.26.0+cu128"
+  },
   "nih_images": {"path": "data/raw/images", "file_count": 112120, "bytes": 45057440698}
 }
 ~~~
@@ -1328,10 +1539,66 @@ the protocol provenance header.
 - [ ] **Step 4: Freeze configs and protocol after the plan commit, before any acceptance training**
 
 ~~~powershell
-git log -1 --format=%H -- docs/superpowers/plans/2026-08-30-one-day-f1-experiment.md
-git diff --quiet -- docs/superpowers/plans/2026-08-30-one-day-f1-experiment.md
-git add configs/nih_f1_bce.yaml configs/nih_f1_posweight.yaml docs/experiments/2026-08-30-nih-f1-run.md docs/experiments/2026-08-30-input-inventory.json
-git commit -m "docs: define controlled NIH F1 runs"
+$planCommit = (git log -1 --format=%H -- docs/superpowers/plans/2026-08-30-one-day-f1-experiment.md).Trim()
+if ($planCommit -notmatch '^[0-9a-f]{40}$') { throw "Task 0 plan commit is missing." }
+if (git status --porcelain -- docs/superpowers/plans/2026-08-30-one-day-f1-experiment.md) {
+    throw "The frozen plan has uncommitted changes."
+}
+$freezePaths = @(
+    "configs/nih_f1_bce.yaml",
+    "configs/nih_f1_posweight.yaml",
+    "docs/experiments/2026-08-30-nih-f1-run.md",
+    "docs/experiments/2026-08-30-input-inventory.json"
+)
+$missing = @($freezePaths | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
+if ($missing.Count -ne 0) {
+    throw "Task 5 freeze target is missing: $($missing -join ', ')"
+}
+$targetStatus = @(git status --porcelain=v1 -uall -- $freezePaths | Where-Object { $_ })
+if ($targetStatus.Count -ne $freezePaths.Count -or @($targetStatus | Where-Object { $_.Substring(0, 2) -ne "??" }).Count -ne 0) {
+    throw "Task 5 targets are not all newly-created untracked files; refusing to overwrite or reuse a partial freeze."
+}
+$inventoryHash = (Get-FileHash docs/experiments/2026-08-30-input-inventory.json -Algorithm SHA256).Hash.ToLowerInvariant()
+$protocolPath = "docs/experiments/2026-08-30-nih-f1-run.md"
+$protocolText = Get-Content -Raw -LiteralPath $protocolPath
+if (([regex]::Matches($protocolText, 'plan_commit: ""')).Count -ne 1 -or ([regex]::Matches($protocolText, 'inventory_sha256: ""')).Count -ne 1) {
+    throw "Protocol provenance header is missing its exact empty fields."
+}
+$protocolText = $protocolText.Replace('plan_commit: ""', "plan_commit: `"$planCommit`"")
+$protocolText = $protocolText.Replace('inventory_sha256: ""', "inventory_sha256: `"$inventoryHash`"")
+if ($protocolText.Contains('plan_commit: ""') -or $protocolText.Contains('inventory_sha256: ""') -or
+    -not $protocolText.Contains(('plan_commit: "' + $planCommit + '"')) -or
+    -not $protocolText.Contains(('inventory_sha256: "' + $inventoryHash + '"')) -or
+    $protocolText -notmatch 'plan_commit: "[0-9a-f]{40}"' -or
+    $protocolText -notmatch 'inventory_sha256: "[0-9a-f]{64}"') {
+    throw "Protocol provenance replacement did not produce valid hashes."
+}
+Set-Content -LiteralPath $protocolPath -Value $protocolText -Encoding utf8NoBOM
+$cachedBeforeFreeze = @(git diff --cached --name-only | Where-Object { $_ })
+if ($cachedBeforeFreeze.Count -ne 0) {
+    throw "Unrelated files are already staged before the Task 5 freeze commit."
+}
+git add -- configs/nih_f1_bce.yaml configs/nih_f1_posweight.yaml docs/experiments/2026-08-30-nih-f1-run.md docs/experiments/2026-08-30-input-inventory.json
+Assert-StagedPaths @("configs/nih_f1_bce.yaml", "configs/nih_f1_posweight.yaml", "docs/experiments/2026-08-30-nih-f1-run.md", "docs/experiments/2026-08-30-input-inventory.json")
+git commit --only -m "docs: define controlled NIH F1 runs" -- configs/nih_f1_bce.yaml configs/nih_f1_posweight.yaml docs/experiments/2026-08-30-nih-f1-run.md docs/experiments/2026-08-30-input-inventory.json
+Assert-CommitPaths @("configs/nih_f1_bce.yaml", "configs/nih_f1_posweight.yaml", "docs/experiments/2026-08-30-nih-f1-run.md", "docs/experiments/2026-08-30-input-inventory.json")
+$configCommit = (git rev-parse HEAD).Trim()
+if ($configCommit -notmatch '^[0-9a-f]{40}$') { throw "Freeze commit hash is invalid." }
+$protocolText = Get-Content -Raw -LiteralPath $protocolPath
+if (([regex]::Matches($protocolText, 'config_commit: ""')).Count -ne 1) {
+    throw "Protocol config_commit field is missing or already populated."
+}
+$protocolText = $protocolText.Replace('config_commit: ""', "config_commit: `"$configCommit`"")
+if ($protocolText.Contains('config_commit: ""') -or
+    -not $protocolText.Contains(('config_commit: "' + $configCommit + '"')) -or
+    $protocolText -notmatch 'config_commit: "[0-9a-f]{40}"') {
+    throw "Protocol config_commit replacement did not produce a valid hash."
+}
+Set-Content -LiteralPath $protocolPath -Value $protocolText -Encoding utf8NoBOM
+git add -- docs/experiments/2026-08-30-nih-f1-run.md
+Assert-StagedPaths @("docs/experiments/2026-08-30-nih-f1-run.md")
+git commit --only -m "docs: record experiment freeze commit" -- docs/experiments/2026-08-30-nih-f1-run.md
+Assert-CommitPaths @("docs/experiments/2026-08-30-nih-f1-run.md")
 ~~~
 
 Expected: the first command prints the already-committed plan hash, and the
@@ -1358,6 +1625,7 @@ if ($checkpointHash -ne "be8ef6905f358488ed6d5dd2da8879c656084ee5d184795587a5cce
 if (($nihImages.Count -ne 112120) -or ($nihImages.Sum -ne 45057440698)) {
     throw "NIH image inventory differs from the frozen pre-training inventory."
 }
+& ".venv/Scripts/python.exe" -c "import hashlib, pathlib, torch, torchvision; p=pathlib.Path(torch.hub.get_dir())/'checkpoints'/'resnet18-f37072fd.pth'; assert p.is_file(), p; h=hashlib.sha256(p.read_bytes()).hexdigest(); assert h=='f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec', h; print(torchvision.__version__, torchvision.models.ResNet18_Weights.DEFAULT.url, p, h)"
 $bceSmokeDir = "D:/ChestXRobustRuns/2026-08-30-smoke/nih_f1_bce"
 $posWeightSmokeDir = "D:/ChestXRobustRuns/2026-08-30-smoke/nih_f1_posweight"
 if ((Test-Path -LiteralPath $bceSmokeDir) -or (Test-Path -LiteralPath $posWeightSmokeDir)) {
@@ -1369,26 +1637,30 @@ $acceptanceClock = [System.Diagnostics.Stopwatch]::StartNew()
 & ".venv/Scripts/python.exe" smoke_test.py --config configs/nih_f1_bce.yaml
 & ".venv/Scripts/python.exe" smoke_test.py --config configs/nih_f1_posweight.yaml
 & ".venv/Scripts/python.exe" train.py --config configs/nih_f1_bce.yaml --epochs 1 --max-hours 0.5 --output-dir $bceSmokeDir
-& ".venv/Scripts/python.exe" -c "import json, pathlib; p=pathlib.Path(r'D:/ChestXRobustRuns/2026-08-30-smoke/nih_f1_bce'); h=json.load(open(p/'history.json', encoding='utf-8')); assert h['run_metadata']['stop_reason']=='completed', h['run_metadata']; assert len(h['epochs'])==1; assert (p/'best.pt').is_file() and (p/'last.pt').is_file()"
+& ".venv/Scripts/python.exe" -c "import json, pathlib, math; p=pathlib.Path(r'D:/ChestXRobustRuns/2026-08-30-smoke/nih_f1_bce'); h=json.load(open(p/'history.json', encoding='utf-8')); assert h['run_metadata']['stop_reason']=='completed', h['run_metadata']; assert len(h['epochs'])==1; assert all(math.isfinite(float(e['train_loss'])) and math.isfinite(float(e['val_loss'])) for e in h['epochs']); assert (p/'best.pt').is_file() and (p/'last.pt').is_file()"
 if ($acceptanceClock.Elapsed.TotalHours -ge 1) {
     throw "Acceptance budget exhausted after BCE; record pos_weight acceptance as incomplete."
 }
 & ".venv/Scripts/python.exe" train.py --config configs/nih_f1_posweight.yaml --epochs 1 --max-hours 0.5 --output-dir $posWeightSmokeDir
-& ".venv/Scripts/python.exe" -c "import json, pathlib; p=pathlib.Path(r'D:/ChestXRobustRuns/2026-08-30-smoke/nih_f1_posweight'); h=json.load(open(p/'history.json', encoding='utf-8')); assert h['run_metadata']['stop_reason']=='completed', h['run_metadata']; assert len(h['epochs'])==1; assert (p/'best.pt').is_file() and (p/'last.pt').is_file()"
+& ".venv/Scripts/python.exe" -c "import json, pathlib, math; p=pathlib.Path(r'D:/ChestXRobustRuns/2026-08-30-smoke/nih_f1_posweight'); h=json.load(open(p/'history.json', encoding='utf-8')); assert h['run_metadata']['stop_reason']=='completed', h['run_metadata']; assert len(h['epochs'])==1; assert all(math.isfinite(float(e['train_loss'])) and math.isfinite(float(e['val_loss'])) for e in h['epochs']); assert (p/'best.pt').is_file() and (p/'last.pt').is_file()"
 if ($acceptanceClock.Elapsed.TotalHours -ge 1) {
     throw "Acceptance runs exceeded one hour; record the day as incomplete."
 }
 ~~~
 
 Expected: both batch checks print 14-logit shapes and finite losses; both
-one-epoch directories contain `best.pt`, `last.pt`, and valid `history.json`.
-The pos-weight run records `bce_pos_weight` and finite weights. `max_hours` is
-an epoch-boundary guard, so if one epoch itself crosses its budget, record the
-overrun and do not start another acceptance item after the one-hour total gate.
-Any missing or over-budget acceptance arm is a hard stop: record the experiment
-as incomplete and do not execute Task 7 Step 4 threshold/report generation,
-Step 5 selection, or Step 6 final test. `Task 4` implementation is already
-complete at this point; do not describe this runtime stop as undoing that code.
+one-epoch directories contain `best.pt`, `last.pt`, and valid `history.json`
+with `run_metadata.stop_reason == "completed"`. The pos-weight run records
+`bce_pos_weight` and finite weights. `max_hours` is an epoch-boundary guard:
+if the single epoch crosses its 0.5-hour arm budget, the engine may write a
+valid one-epoch artifact with `stop_reason == "max_hours"`, but that arm is
+diagnostic only and the acceptance gate fails. Record the overrun, do not start
+another acceptance item after the one-hour total gate, and do not treat that
+artifact as a completed acceptance run. Any missing, non-finite, or over-budget
+acceptance arm is a hard stop: record the experiment as incomplete and do not
+execute Task 7 Step 4 threshold/report generation, Step 5 selection, or Step 6
+final test. `Task 4` implementation is already complete at this point; do not
+describe this runtime stop as undoing that code.
 The historical fixed-threshold assertion runs before `smoke_test.py` or either
 one-epoch training command; a mismatch stops all GPU work.
 
@@ -1465,7 +1737,11 @@ Implement this contract:
    `parallel_read_ok`; any concurrent read failure blocks readiness. This is a
    removable-drive I/O check, not model inference.
 5. Return JSON-serializable row counts, sampled/missing/unreadable counts, free
-   and required bytes, and:
+   and required bytes, plus the actual `archive_bytes`, `extracted_bytes`, and
+   `headroom_bytes` operands used in the capacity calculation. The required
+   value is `max(configured_minimum, archive_bytes + extracted_bytes + 10 GiB)`;
+   missing size metadata remains `size_metadata_missing` rather than an
+   optimistic capacity result. Also return:
 
 ~~~python
 STRICT_SHARED_LABEL_MAP = [
@@ -1487,6 +1763,16 @@ The CLI writes a report only with `--report` and exits 0 for `ok`, 2 for
 `blocked`. It is read-only for the data tree; the report is the only write.
 
 - [ ] **Step 3: Add the explicit preflight config**
+
+Before writing, require the target to be absent; an existing file may belong to
+the user or a prior freeze and must be inspected rather than overwritten.
+
+~~~powershell
+$path = "configs/chexpert_preflight.yaml"
+if (Test-Path -LiteralPath $path) {
+    throw "Preflight config already exists; refusing to overwrite $path."
+}
+~~~
 
 Create `configs/chexpert_preflight.yaml`:
 
@@ -1520,18 +1806,44 @@ invalid until it persists patient-disjoint train/validation/test membership.
 
 ~~~powershell
 & ".venv/Scripts/python.exe" -m pytest tests/test_chexpert_preflight.py -q
-& ".venv/Scripts/python.exe" preflight_chexpert.py --config configs/chexpert_preflight.yaml --report docs/experiments/chexpert-preflight-2026-08-30.json
+$preflightReport = "docs/experiments/chexpert-preflight-2026-08-30.json"
+if (Test-Path -LiteralPath $preflightReport) {
+    throw "Preflight report already exists; refusing to overwrite $preflightReport."
+}
+# The CLI intentionally returns 2 for a machine-readable blocked result. Keep
+# native-command error handling off only for this invocation so that 2 can be
+# inspected and recorded rather than aborting the protocol shell.
+$oldNativePreference = $PSNativeCommandUseErrorActionPreference
+$PSNativeCommandUseErrorActionPreference = $false
+try {
+    & ".venv/Scripts/python.exe" preflight_chexpert.py --config configs/chexpert_preflight.yaml --report $preflightReport
+    $preflightExit = $LASTEXITCODE
+} finally {
+    $PSNativeCommandUseErrorActionPreference = $oldNativePreference
+}
+if ($preflightExit -notin @(0, 2)) {
+    throw "CheXpert preflight failed unexpectedly with exit code $preflightExit."
+}
+$preflightJson = Get-Content -Raw -LiteralPath $preflightReport | ConvertFrom-Json
+if (($preflightExit -eq 0 -and $preflightJson.status -ne "ok") -or
+    ($preflightExit -eq 2 -and $preflightJson.status -ne "blocked")) {
+    throw "Preflight exit/status mismatch: exit=$preflightExit status=$($preflightJson.status)"
+}
 ~~~
 
 Expected: `status=ok` with measured rows/sample/readability, or `status=blocked`
 with the exact access/capacity/layout reason. Neither outcome authorizes
-conversion, training, or a robustness claim.
+conversion, training, or an external robustness claim. Exit code `2` is an
+expected, recorded blocked outcome (for example, the checked-in `null` size
+metadata normally yields `size_metadata_missing`); it is not a script failure.
 
 - [ ] **Step 5: Commit**
 
 ~~~powershell
-git add baseline/chexpert_preflight.py preflight_chexpert.py configs/chexpert_preflight.yaml tests/test_chexpert_preflight.py
-git commit -m "feat: add CheXpert staging preflight"
+git add -- baseline/chexpert_preflight.py preflight_chexpert.py configs/chexpert_preflight.yaml tests/test_chexpert_preflight.py
+Assert-StagedPaths @("baseline/chexpert_preflight.py", "preflight_chexpert.py", "configs/chexpert_preflight.yaml", "tests/test_chexpert_preflight.py")
+git commit --only -m "feat: add CheXpert staging preflight" -- baseline/chexpert_preflight.py preflight_chexpert.py configs/chexpert_preflight.yaml tests/test_chexpert_preflight.py
+Assert-CommitPaths @("baseline/chexpert_preflight.py", "preflight_chexpert.py", "configs/chexpert_preflight.yaml", "tests/test_chexpert_preflight.py")
 ~~~
 
 ---
@@ -1590,7 +1902,7 @@ if ($checkpointDrive.Free -lt 5GB) {
     throw "D: has less than 5 GiB free for isolated checkpoints."
 }
 $checkpointDrive | Select-Object Name, Used, Free
-& ".venv/Scripts/python.exe" -c "import torch, torchvision, sys; print(sys.version); print(torch.__version__); print(torchvision.__version__); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'cpu')"
+& ".venv/Scripts/python.exe" -c "import torch, torchvision, sys; print(sys.version); print(torch.__version__); print(torchvision.__version__); print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'cpu'); print('tf32_matmul=', torch.backends.cuda.matmul.allow_tf32, 'tf32_cudnn=', torch.backends.cudnn.allow_tf32, 'cublas=', __import__('os').environ.get('CUBLAS_WORKSPACE_CONFIG'))"
 ~~~
 
 Expected: finite losses, 14-logit output, at least 5 GiB free on `D:`, and a
@@ -1605,15 +1917,18 @@ if ((Test-Path -LiteralPath $bceRunDir) -or (Test-Path -LiteralPath $posWeightRu
     throw "Registered output already exists; do not overwrite it."
 }
 & ".venv/Scripts/python.exe" train.py --config configs/nih_f1_bce.yaml
-& ".venv/Scripts/python.exe" -c "import json, pathlib; p=pathlib.Path(r'D:/ChestXRobustRuns/nih_f1_bce'); h=json.load(open(p/'history.json', encoding='utf-8')); assert h['run_metadata']['stop_reason'] in ('completed','early_stopping'), h['run_metadata']; assert len(h['epochs']) >= 1; assert (p/'best.pt').is_file() and (p/'last.pt').is_file()"
+& ".venv/Scripts/python.exe" -c "import json, pathlib, math; p=pathlib.Path(r'D:/ChestXRobustRuns/nih_f1_bce'); h=json.load(open(p/'history.json', encoding='utf-8')); assert h['run_metadata']['stop_reason'] in ('completed','early_stopping'), h['run_metadata']; assert len(h['epochs']) >= 1; assert all(math.isfinite(float(e['train_loss'])) and math.isfinite(float(e['val_loss'])) for e in h['epochs']); assert (p/'best.pt').is_file() and (p/'last.pt').is_file()"
 & ".venv/Scripts/python.exe" train.py --config configs/nih_f1_posweight.yaml
-& ".venv/Scripts/python.exe" -c "import json, pathlib; p=pathlib.Path(r'D:/ChestXRobustRuns/nih_f1_posweight'); h=json.load(open(p/'history.json', encoding='utf-8')); assert h['run_metadata']['stop_reason'] in ('completed','early_stopping'), h['run_metadata']; assert len(h['epochs']) >= 1; assert (p/'best.pt').is_file() and (p/'last.pt').is_file()"
+& ".venv/Scripts/python.exe" -c "import json, pathlib, math; p=pathlib.Path(r'D:/ChestXRobustRuns/nih_f1_posweight'); h=json.load(open(p/'history.json', encoding='utf-8')); assert h['run_metadata']['stop_reason'] in ('completed','early_stopping'), h['run_metadata']; assert len(h['epochs']) >= 1; assert all(math.isfinite(float(e['train_loss'])) and math.isfinite(float(e['val_loss'])) for e in h['epochs']); assert (p/'best.pt').is_file() and (p/'last.pt').is_file()"
 ~~~
 
 Expected: each output directory contains `last.pt`, `best.pt`, and
 `history.json`; best selection uses validation `macro_auprc`; neither command
-loads `test`. A `max_hours` stop, missing checkpoint, empty history, or any
-non-finite epoch is a hard stop and prevents Task 4 onward.
+loads `test`. Read `history.json.run_metadata.stop_reason` before proceeding:
+only `completed` or `early_stopping` makes a candidate eligible. A
+`max_hours` stop (even when it left a usable checkpoint), missing checkpoint,
+empty history, or any non-finite epoch is a hard stop and prevents Task 7
+Step 4 threshold/report generation, Step 5 selection, and Step 6 final test.
 
 - [ ] **Step 4: Fit thresholds and create validation reports**
 
@@ -1645,8 +1960,10 @@ NIH test report yet.
 
 ~~~powershell
 & ".venv/Scripts/python.exe" select_candidate.py --reference-report docs/experiments/nih-f1-reference-validation-tuned.json --bce-report docs/experiments/nih-f1-bce-validation-tuned.json --posweight-report docs/experiments/nih-f1-posweight-validation-tuned.json --output docs/experiments/nih-f1-selection.json
-git add docs/experiments/nih-f1-selection.json docs/experiments/*validation*.json docs/experiments/*thresholds.json
-git commit -m "exp: freeze NIH validation selection"
+git add -- docs/experiments/nih-f1-selection.json docs/experiments/nih-f1-reference-validation-fixed.json docs/experiments/nih-f1-reference-validation-tuned.json docs/experiments/nih-f1-bce-validation-fixed.json docs/experiments/nih-f1-bce-validation-tuned.json docs/experiments/nih-f1-posweight-validation-fixed.json docs/experiments/nih-f1-posweight-validation-tuned.json docs/experiments/nih-f1-reference-thresholds.json docs/experiments/nih-f1-bce-thresholds.json docs/experiments/nih-f1-posweight-thresholds.json
+Assert-StagedPaths @("docs/experiments/nih-f1-selection.json", "docs/experiments/nih-f1-reference-validation-fixed.json", "docs/experiments/nih-f1-reference-validation-tuned.json", "docs/experiments/nih-f1-bce-validation-fixed.json", "docs/experiments/nih-f1-bce-validation-tuned.json", "docs/experiments/nih-f1-posweight-validation-fixed.json", "docs/experiments/nih-f1-posweight-validation-tuned.json", "docs/experiments/nih-f1-reference-thresholds.json", "docs/experiments/nih-f1-bce-thresholds.json", "docs/experiments/nih-f1-posweight-thresholds.json")
+git commit --only -m "exp: freeze NIH validation selection" -- docs/experiments/nih-f1-selection.json docs/experiments/nih-f1-reference-validation-fixed.json docs/experiments/nih-f1-reference-validation-tuned.json docs/experiments/nih-f1-bce-validation-fixed.json docs/experiments/nih-f1-bce-validation-tuned.json docs/experiments/nih-f1-posweight-validation-fixed.json docs/experiments/nih-f1-posweight-validation-tuned.json docs/experiments/nih-f1-reference-thresholds.json docs/experiments/nih-f1-bce-thresholds.json docs/experiments/nih-f1-posweight-thresholds.json
+Assert-CommitPaths @("docs/experiments/nih-f1-selection.json", "docs/experiments/nih-f1-reference-validation-fixed.json", "docs/experiments/nih-f1-reference-validation-tuned.json", "docs/experiments/nih-f1-bce-validation-fixed.json", "docs/experiments/nih-f1-bce-validation-tuned.json", "docs/experiments/nih-f1-posweight-validation-fixed.json", "docs/experiments/nih-f1-posweight-validation-tuned.json", "docs/experiments/nih-f1-reference-thresholds.json", "docs/experiments/nih-f1-bce-thresholds.json", "docs/experiments/nih-f1-posweight-thresholds.json")
 ~~~
 
 Inspect that the record has `selection_split: val`, selected checkpoint and
@@ -1700,8 +2017,23 @@ values registered in Task 5.
 - [ ] **Step 8: Commit the measured record**
 
 ~~~powershell
-git add docs/experiments
-git commit -m "exp: record one-day NIH F1 results"
+$measuredPaths = @(
+    "docs/experiments/2026-08-30-nih-f1-run.md",
+    "docs/experiments/nih-f1-final-test/manifest.json",
+    "docs/experiments/nih-f1-final-test/nih-f1-reference-test-fixed.json",
+    "docs/experiments/nih-f1-final-test/nih-f1-reference-test-tuned.json",
+    "docs/experiments/nih-f1-final-test/nih-f1-selected-test-fixed.json",
+    "docs/experiments/nih-f1-final-test/nih-f1-selected-test-tuned.json"
+)
+$preflightPath = "docs/experiments/chexpert-preflight-2026-08-30.json"
+if (Test-Path -LiteralPath $preflightPath -PathType Leaf) {
+    $measuredPaths += $preflightPath
+}
+git add -- $measuredPaths
+Assert-StagedPaths $measuredPaths
+git commit --only -m "exp: record one-day NIH F1 results" -- $measuredPaths
+$measuredCommit = (git rev-parse HEAD).Trim()
+Assert-CommitPaths $measuredPaths $measuredCommit
 ~~~
 
 The record must state external status `ok`, `blocked`, or `not attempted`, identify
