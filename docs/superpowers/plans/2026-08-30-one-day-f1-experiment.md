@@ -1350,7 +1350,7 @@ the cuDNN flags and call `torch.use_deterministic_algorithms(True)` before any
 `torch.cuda.manual_seed_all` call, and disable both TF32 flags. The subprocess
 smoke test proves the final linear layer does not fail under the selected cuBLAS
 workspace setting. Record `tf32_matmul` and `tf32_cudnn` in metadata.
-Before any `build_model(..., pretrained=True)` call, resolve
+Before any model-construction call with `pretrained=True`, resolve
 `torch.hub.get_dir()/checkpoints/resnet18-f37072fd.pth`, require that it exists,
 verify the registered SHA-256, and pass the already-validated weight selection
 to the model builder. A missing or mismatched cache is a blocked run, not a
