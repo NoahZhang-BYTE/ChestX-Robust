@@ -1,81 +1,57 @@
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import pytest
 import torch
-from torch.utils.data import DataLoader, TensorDataset
+import yaml
+from PIL import Image
 
-from baseline.evaluation import (
-    collect_predictions,
-    compute_auc_metrics,
-    compute_f1_metrics,
-    compute_per_class_metrics,
-    find_per_class_thresholds,
-)
+from baseline.evaluation import evaluate_checkpoint
+from baseline.labels import LABEL_COLUMNS
+from baseline.models import build_model
 
 
-def test_collect_predictions_returns_sigmoid_probabilities_in_eval_mode():
-    model = torch.nn.Linear(2, 2, bias=False)
-    with torch.no_grad():
-        model.weight.copy_(torch.eye(2))
-    model.train()
-    loader = DataLoader(
-        TensorDataset(torch.tensor([[0.0, 1.0], [2.0, -1.0]]), torch.tensor([[0.0, 1.0], [1.0, 0.0]])),
-        batch_size=1,
-        shuffle=False,
-    )
-
-    targets, probabilities = collect_predictions(model, loader, torch.device("cpu"))
-
-    assert model.training is False
-    np.testing.assert_array_equal(targets, [[0, 1], [1, 0]])
-    np.testing.assert_allclose(probabilities, [[0.5, 0.7310586], [0.8807971, 0.2689414]], atol=1e-7)
-
-
-def test_auc_and_f1_metrics_report_perfect_prediction_scores():
-    targets = np.array([[1, 0], [0, 1], [1, 1], [0, 1]])
-    probabilities = np.array([[0.9, 0.1], [0.1, 0.9], [0.8, 0.8], [0.2, 0.8]])
-
-    auc = compute_auc_metrics(targets, probabilities, ["a", "b"])
-    f1 = compute_f1_metrics(targets, probabilities, [0.5, 0.5])
-
-    assert auc["macro_auroc"] == pytest.approx(1.0)
-    assert auc["micro_auprc"] == pytest.approx(1.0)
-    assert [row["label"] for row in auc["per_class"]] == ["a", "b"]
-    assert f1 == {"macro_f1": 1.0, "micro_f1": 1.0, "sample_f1": 1.0}
+def _write_fixture(tmp_path: Path) -> tuple[Path, Path]:
+    image_root = tmp_path / "images"
+    image_root.mkdir()
+    rows = []
+    for index, split in enumerate(("train", "val", "test")):
+        name = f"{index}.png"
+        Image.fromarray(np.full((16, 16, 3), index * 40, dtype=np.uint8)).save(image_root / name)
+        rows.append({"image_id": name, "path": name, "split": split, "patient_id": index, **{label: int(label == "Atelectasis" and index == 0) for label in LABEL_COLUMNS}})
+    csv_path = tmp_path / "labels.csv"
+    pd.DataFrame(rows).to_csv(csv_path, index=False)
+    config = {
+        "data": {"csv_path": str(csv_path), "image_root": str(image_root), "image_col": "path", "label_cols": list(LABEL_COLUMNS), "image_size": 16, "batch_size": 1, "num_workers": 0, "val_split": 0.2},
+        "model": {"name": "resnet18", "pretrained": False},
+        "device": "cpu",
+    }
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+    return config_path, csv_path
 
 
-def test_per_class_metrics_supports_vector_thresholds_and_counts():
-    targets = np.array([[1, 0], [0, 1], [1, 0], [0, 1]])
-    probabilities = np.array([[0.6, 0.2], [0.4, 0.6], [0.8, 0.1], [0.2, 0.9]])
-
-    rows = compute_per_class_metrics(targets, probabilities, ["a", "b"], thresholds=[0.5, 0.7])
-
-    assert rows[0]["threshold"] == 0.5
-    assert rows[1]["threshold"] == 0.7
-    assert rows[0]["positive_count"] == 2
-    assert rows[0]["total_count"] == 4
-    assert rows[0]["specificity"] == pytest.approx(1.0)
+def test_evaluate_checkpoint_returns_complete_validation_report(tmp_path):
+    config_path, _ = _write_fixture(tmp_path)
+    model = build_model("resnet18", len(LABEL_COLUMNS), pretrained=False)
+    checkpoint = tmp_path / "model.pt"
+    torch.save({"model_state": model.state_dict(), "config": yaml.safe_load(config_path.read_text()), "metrics": {"macro_f1": 0.1}}, checkpoint)
+    result = evaluate_checkpoint(checkpoint, config_path, split="val", threshold=0.5)
+    assert result["split"] == "val"
+    assert {"macro_auroc", "micro_auroc", "macro_auprc", "micro_auprc", "macro_f1", "micro_f1", "sample_f1", "per_label"} <= result["metrics"].keys()
 
 
-def test_threshold_search_uses_one_valid_threshold_per_class_and_falls_back_for_degenerate_label():
-    targets = np.column_stack((np.array([0, 0, 1, 1]), np.zeros(4, dtype=int)))
-    probabilities = np.column_stack((np.array([0.1, 0.2, 0.8, 0.9]), np.array([0.1, 0.2, 0.3, 0.4])))
-
-    with pytest.warns(RuntimeWarning, match="degenerate"):
-        thresholds = find_per_class_thresholds(targets, probabilities)
-
-    assert thresholds.shape == (2,)
-    assert np.all((thresholds >= 0.0) & (thresholds <= 1.0))
-    assert thresholds[1] == 0.5
+def test_evaluate_checkpoint_rejects_test_threshold_fit(tmp_path):
+    config_path, _ = _write_fixture(tmp_path)
+    model = build_model("resnet18", len(LABEL_COLUMNS), pretrained=False)
+    checkpoint = tmp_path / "model.pt"
+    torch.save({"model_state": model.state_dict(), "config": yaml.safe_load(config_path.read_text())}, checkpoint)
+    with pytest.raises(ValueError, match="test.*fit|fit.*test"):
+        evaluate_checkpoint(checkpoint, config_path, split="test", fit_thresholds=True)
 
 
-@pytest.mark.parametrize(
-    ("targets", "probabilities", "message"),
-    [
-        (np.zeros((2, 1)), np.zeros((3, 1)), "matching shapes"),
-        (np.zeros((2, 1)), np.array([[0.5], [np.nan]]), "finite"),
-        (np.zeros((2, 1)), np.array([[0.5], [np.inf]]), "finite"),
-    ],
-)
-def test_metric_functions_reject_shape_mismatch_and_nonfinite_probabilities(targets, probabilities, message):
-    with pytest.raises(ValueError, match=message):
-        compute_auc_metrics(targets, probabilities)
+def test_evaluate_checkpoint_rejects_direct_test_evaluation(tmp_path):
+    config_path, _ = _write_fixture(tmp_path)
+    with pytest.raises(ValueError, match="test.*frozen|frozen.*test"):
+        evaluate_checkpoint(tmp_path / "unused.pt", config_path, split="test")

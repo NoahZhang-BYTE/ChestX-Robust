@@ -1,0 +1,57 @@
+{
+  "B2_analysis": "completed",
+  "B2_test": "completed",
+  "B2_threshold_tuning": "completed",
+  "B2_training": "completed",
+  "B2_vs_B3": "completed",
+  "B2_vs_B3_validation": "completed",
+  "B3_analysis": "completed",
+  "B3_test": "pending",
+  "B3_threshold_tuning": "completed",
+  "B3_training": "completed",
+  "B4_analysis": "pending",
+  "B4_training": "running",
+  "B5_confirmation": "pending",
+  "cooccurrence_analysis": "completed",
+  "current_stage": "B4_training",
+  "final_test": "pending",
+  "hard_label_analysis": "completed",
+  "last_update": "2026-09-01T10:39:53.899096+00:00",
+  "night_mode": {
+    "b5_forbidden": true,
+    "initialized": true,
+    "last_observed_epoch": {
+      "B3_training": 10,
+      "B4_training": 0
+    },
+    "started_at": "2026-08-31T20:09:03.370290+00:00",
+    "test_forbidden": true,
+    "whea_baseline": {
+      "available": true,
+      "events_at_initialization": 0,
+      "latest_record_id": null
+    }
+  },
+  "recovery_count": {
+    "B3_training": 2,
+    "B4_training": 0
+  },
+  "stages": {
+    "B2_analysis": "completed",
+    "B2_test": "completed",
+    "B2_threshold_tuning": "completed",
+    "B2_training": "completed",
+    "B2_vs_B3": "completed",
+    "B2_vs_B3_validation": "completed",
+    "B3_analysis": "completed",
+    "B3_test": "pending",
+    "B3_threshold_tuning": "completed",
+    "B3_training": "completed",
+    "B4_analysis": "pending",
+    "B4_training": "running",
+    "B5_confirmation": "pending",
+    "cooccurrence_analysis": "completed",
+    "final_test": "pending",
+    "hard_label_analysis": "completed"
+  }
+}

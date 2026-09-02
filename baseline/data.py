@@ -77,7 +77,7 @@ def build_dataloaders(
     image_size: int = 224,
     batch_size: int = 16,
     num_workers: int = 0,
-    prefetch_factor: int = 2,
+    prefetch_factor: int | None = 2,
     persistent_workers: bool = True,
     seed: int = 42,
 ) -> tuple[DataLoader, DataLoader, list[str]]:
@@ -90,11 +90,14 @@ def build_dataloaders(
             label_cols = [column for column in frame.columns if column not in metadata_columns]
     label_cols = list(label_cols)
     if "split" in frame.columns:
+        _validate_persisted_splits(frame)
         train_frame = frame.loc[frame["split"] == "train"].reset_index(drop=True)
         val_frame = frame.loc[frame["split"] == "val"].reset_index(drop=True)
         if train_frame.empty or val_frame.empty:
             raise ValueError("CSV split column must contain non-empty train and val rows")
     else:
+        if "patient_id" in frame.columns:
+            raise ValueError("Patient-addressable CSV requires a persisted split column")
         train_frame, val_frame = _split_frame(frame, val_split, seed)
     normalize = transforms.Normalize(
         mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
@@ -114,13 +117,129 @@ def build_dataloaders(
     val_dataset = MultiLabelImageDataset(val_frame, image_root, image_col, label_cols, val_transform)
     if num_workers < 0:
         raise ValueError("num_workers must be non-negative")
-    if prefetch_factor < 1:
-        raise ValueError("prefetch_factor must be at least 1")
     loader_kwargs = {"batch_size": batch_size, "num_workers": num_workers, "pin_memory": torch.cuda.is_available()}
     if num_workers:
+        if prefetch_factor is None or prefetch_factor < 1:
+            raise ValueError("prefetch_factor must be at least 1 when num_workers is enabled")
         loader_kwargs.update(prefetch_factor=prefetch_factor, persistent_workers=persistent_workers)
     return (
         DataLoader(train_dataset, shuffle=True, **loader_kwargs),
         DataLoader(val_dataset, shuffle=False, **loader_kwargs),
         label_cols,
     )
+
+
+def build_split_loader(
+    csv_path: str | Path,
+    image_root: str | Path = ".",
+    split: str = "val",
+    image_col: str = "image",
+    label_cols: Sequence[str] | None = None,
+    image_size: int = 224,
+    batch_size: int = 16,
+    num_workers: int = 0,
+    prefetch_factor: int | None = 2,
+    persistent_workers: bool = True,
+    preprocessing: dict | None = None,
+) -> tuple[DataLoader, list[str]]:
+    """Load one persisted split after validating split and patient isolation."""
+    if split not in {"train", "val", "test"}:
+        raise ValueError("split must be one of train, val, test")
+    frame = pd.read_csv(csv_path)
+    if "split" not in frame.columns:
+        raise ValueError("Named split loading requires a persisted split column")
+    _validate_persisted_splits(frame)
+    if label_cols is None or not label_cols:
+        if all(column in frame.columns for column in LABEL_COLUMNS):
+            label_cols = list(LABEL_COLUMNS)
+        else:
+            metadata_columns = {image_col, "image_id", "path", "split", "patient_id"}
+            label_cols = [column for column in frame.columns if column not in metadata_columns]
+    label_cols = list(label_cols)
+    subset = frame.loc[frame["split"].eq(split)].reset_index(drop=True)
+    if subset.empty:
+        raise ValueError(f"Persisted split '{split}' contains no rows")
+    spec = evaluation_preprocessing_spec(image_size)
+    if preprocessing is not None and preprocessing != spec:
+        raise ValueError("Evaluation preprocessing does not match the frozen specification")
+    normalize = transforms.Normalize(
+        mean=spec["normalize_mean"], std=spec["normalize_std"]
+    )
+    transform = transforms.Compose(
+        [transforms.Resize(tuple(spec["resize"])), transforms.ToTensor(), normalize]
+    )
+    dataset = MultiLabelImageDataset(subset, image_root, image_col, label_cols, transform)
+    if num_workers < 0:
+        raise ValueError("num_workers must be non-negative")
+    loader_kwargs = {
+        "batch_size": batch_size,
+        "num_workers": num_workers,
+        "pin_memory": torch.cuda.is_available(),
+    }
+    if num_workers:
+        if prefetch_factor is None or prefetch_factor < 1:
+            raise ValueError("prefetch_factor must be at least 1 when num_workers is enabled")
+        loader_kwargs.update(prefetch_factor=prefetch_factor, persistent_workers=persistent_workers)
+    return DataLoader(dataset, shuffle=False, **loader_kwargs), label_cols
+
+
+def build_evaluation_loader(
+    csv_path: str | Path,
+    image_root: str | Path = ".",
+    split: str = "val",
+    image_col: str = "image",
+    label_cols: Sequence[str] | None = None,
+    image_size: int = 224,
+    batch_size: int = 16,
+    num_workers: int = 0,
+    prefetch_factor: int | None = 2,
+    persistent_workers: bool = True,
+    preprocessing: dict | None = None,
+) -> tuple[DataLoader, list[str]]:
+    """Load a persisted validation or test split with deterministic preprocessing."""
+    if split not in {"val", "test"}:
+        raise ValueError("evaluation split must be val or test")
+    return build_split_loader(
+        csv_path=csv_path,
+        image_root=image_root,
+        split=split,
+        image_col=image_col,
+        label_cols=label_cols,
+        image_size=image_size,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        prefetch_factor=prefetch_factor,
+        persistent_workers=persistent_workers,
+        preprocessing=preprocessing,
+    )
+
+
+def evaluation_preprocessing_spec(image_size: int) -> dict:
+    """Return the canonical deterministic validation/test preprocessing spec."""
+    if image_size < 1:
+        raise ValueError("image_size must be positive")
+    return {
+        "resize": [image_size, image_size],
+        "center_crop": None,
+        "to_tensor": True,
+        "normalize_mean": [0.485, 0.456, 0.406],
+        "normalize_std": [0.229, 0.224, 0.225],
+        "random_augmentation": False,
+    }
+
+
+def _validate_persisted_splits(frame: pd.DataFrame) -> None:
+    if not bool(frame["split"].isin(("train", "val", "test")).all()):
+        raise ValueError("CSV split column contains an invalid split")
+    if "patient_id" not in frame.columns:
+        return
+    patients_by_split = {
+        split: set(frame.loc[frame["split"].eq(split), "patient_id"])
+        for split in ("train", "val", "test")
+    }
+    for index, first_split in enumerate(("train", "val", "test")):
+        for second_split in ("train", "val", "test")[index + 1 :]:
+            if patients_by_split[first_split].intersection(patients_by_split[second_split]):
+                raise ValueError(
+                    f"Patient leakage between {first_split} and {second_split} splits"
+                )

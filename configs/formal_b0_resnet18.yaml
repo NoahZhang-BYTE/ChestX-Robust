@@ -1,0 +1,27 @@
+seed: 42
+device: auto
+output_dir: outputs/B0_resnet18
+
+data:
+  csv_path: data/labels.csv
+  image_root: data/raw/images
+  image_col: path
+  label_cols: []
+  image_size: 224
+  val_split: 0.2
+  batch_size: 32
+  num_workers: 4
+  prefetch_factor: 2
+  persistent_workers: true
+
+model:
+  name: resnet18
+  pretrained: true
+
+training:
+  epochs: 10
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  threshold: 0.5
+  amp: true
+  scheduler: none

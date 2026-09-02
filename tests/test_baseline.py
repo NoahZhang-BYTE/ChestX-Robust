@@ -6,7 +6,12 @@ import pytest
 import torch
 from PIL import Image
 
-from baseline.data import MultiLabelImageDataset, build_dataloaders
+from baseline.data import (
+    MultiLabelImageDataset,
+    build_dataloaders,
+    build_evaluation_loader,
+    evaluation_preprocessing_spec,
+)
 from baseline.engine import save_checkpoint
 from baseline.labels import LABEL_COLUMNS, NUM_CLASSES
 from baseline.metrics import multilabel_metrics
@@ -107,6 +112,111 @@ def test_dataloaders_use_persisted_train_and_val_splits(tmp_path):
     assert len(train_loader.dataset) == 2
     assert len(val_loader.dataset) == 1
     assert label_cols == ["finding_a", "finding_b"]
+
+
+@pytest.mark.parametrize(("split", "expected_size"), (("val", 1), ("test", 1)))
+def test_evaluation_loader_uses_requested_persisted_split_without_augmentation(
+    tmp_path, split, expected_size
+):
+    csv_path = _split_fixture_csv(tmp_path)
+
+    loader, label_cols = build_evaluation_loader(
+        csv_path=csv_path,
+        image_root=tmp_path,
+        image_col="path",
+        label_cols=["finding_a", "finding_b"],
+        split=split,
+        image_size=32,
+        batch_size=2,
+    )
+
+    assert len(loader.dataset) == expected_size
+    assert label_cols == ["finding_a", "finding_b"]
+    assert type(loader.sampler).__name__ == "SequentialSampler"
+    assert [type(item).__name__ for item in loader.dataset.transform.transforms] == [
+        "Resize",
+        "ToTensor",
+        "Normalize",
+    ]
+    image, _ = loader.dataset[0]
+    assert image.shape == (3, 32, 32)
+
+
+@pytest.mark.parametrize("split", ("train", "unknown", ""))
+def test_evaluation_loader_rejects_non_evaluation_split(tmp_path, split):
+    csv_path = _split_fixture_csv(tmp_path)
+
+    with pytest.raises(ValueError, match="val or test"):
+        build_evaluation_loader(
+            csv_path=csv_path,
+            image_root=tmp_path,
+            image_col="path",
+            label_cols=["finding_a", "finding_b"],
+            split=split,
+        )
+
+
+@pytest.mark.parametrize("invalid_value", ("unknown", np.nan))
+def test_evaluation_loader_rejects_invalid_persisted_split_values(tmp_path, invalid_value):
+    csv_path = _split_fixture_csv(tmp_path)
+    frame = pd.read_csv(csv_path)
+    frame.loc[0, "split"] = invalid_value
+    frame.to_csv(csv_path, index=False)
+
+    with pytest.raises(ValueError, match="invalid split"):
+        build_evaluation_loader(
+            csv_path=csv_path,
+            image_root=tmp_path,
+            image_col="path",
+            label_cols=["finding_a", "finding_b"],
+            split="val",
+        )
+
+
+def test_evaluation_loader_requires_non_empty_requested_split(tmp_path):
+    csv_path = _split_fixture_csv(tmp_path)
+    frame = pd.read_csv(csv_path)
+    frame.loc[frame["split"] == "test", "split"] = "val"
+    frame.to_csv(csv_path, index=False)
+
+    with pytest.raises(ValueError, match="contains no rows"):
+        build_evaluation_loader(
+            csv_path=csv_path,
+            image_root=tmp_path,
+            image_col="path",
+            label_cols=["finding_a", "finding_b"],
+            split="test",
+        )
+
+
+def test_evaluation_loader_requires_persisted_split_column(tmp_path):
+    csv_path = _fixture_csv(tmp_path)
+
+    with pytest.raises(ValueError, match="persisted split column"):
+        build_evaluation_loader(
+            csv_path=csv_path,
+            image_root=tmp_path,
+            image_col="image",
+            label_cols=["finding_a", "finding_b"],
+            split="val",
+        )
+
+
+def test_evaluation_loader_rejects_preprocessing_that_differs_from_frozen_spec(tmp_path):
+    csv_path = _split_fixture_csv(tmp_path)
+    preprocessing = evaluation_preprocessing_spec(32)
+    preprocessing["normalize_mean"][0] = 0.0
+
+    with pytest.raises(ValueError, match="preprocessing"):
+        build_evaluation_loader(
+            csv_path=csv_path,
+            image_root=tmp_path,
+            image_col="path",
+            label_cols=["finding_a", "finding_b"],
+            split="test",
+            image_size=32,
+            preprocessing=preprocessing,
+        )
 
 
 def test_dataloaders_prefetch_when_workers_are_enabled(tmp_path):

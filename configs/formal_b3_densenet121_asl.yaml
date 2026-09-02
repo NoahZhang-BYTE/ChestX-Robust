@@ -1,0 +1,32 @@
+seed: 42
+device: auto
+output_dir: outputs/B3_densenet121_asl
+
+data:
+  csv_path: data/labels.csv
+  image_root: data/raw/images
+  image_col: path
+  label_cols: []
+  image_size: 224
+  val_split: 0.2
+  batch_size: 32
+  num_workers: 0
+  prefetch_factor: null
+  persistent_workers: false
+
+model:
+  name: densenet121
+  pretrained: true
+
+training:
+  epochs: 10
+  learning_rate: 0.0003
+  weight_decay: 0.0001
+  threshold: 0.5
+  amp: true
+  scheduler: none
+  loss:
+    name: asymmetric
+    gamma_neg: 4.0
+    gamma_pos: 1.0
+    clip: 0.05
