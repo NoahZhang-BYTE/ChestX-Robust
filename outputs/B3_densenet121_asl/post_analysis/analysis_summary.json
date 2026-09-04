@@ -1,0 +1,13 @@
+{
+  "best_epoch_macro_auprc": 9,
+  "best_epoch_macro_auroc": 9,
+  "best_macro_auprc": 0.2697229081966683,
+  "best_macro_auroc": 0.8324673595811959,
+  "completed_epoch": 10,
+  "experiment": "B3_densenet121_asl",
+  "final_train_val_loss_gap": 0.0032093011212324003,
+  "minimum_val_loss": 0.0262466969252798,
+  "minimum_val_loss_epoch": 9,
+  "selection_metric": "validation macro AUPRC",
+  "test_used": false
+}

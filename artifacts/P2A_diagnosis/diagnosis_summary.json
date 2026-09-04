@@ -1,0 +1,651 @@
+{
+  "analysis_scope": {
+    "checkpoint": {
+      "epoch": 5,
+      "path": "C:\\胸片AI多标签高鲁棒\\outputs\\B1_densenet121\\best.pt",
+      "sha256": "6ac4f06032c4a484d880d73a1a45c41327ae8f6a95b9309575290e49d9cf20fe",
+      "validation_macro_auroc": 0.8375908197286742
+    },
+    "frozen_dir": "C:\\胸片AI多标签高鲁棒\\artifacts\\B1_densenet121_eval",
+    "test_used_for_tuning": false,
+    "threshold_fit_split": "val",
+    "threshold_source": "validation"
+  },
+  "correlations": {
+    "prevalence_vs_auprc": {
+      "n": 14,
+      "p_value": 0.010661967747329814,
+      "rho": 0.6571428571428571
+    },
+    "prevalence_vs_auroc": {
+      "n": 14,
+      "p_value": 0.4364347945560527,
+      "rho": -0.22637362637362637
+    },
+    "prevalence_vs_f1": {
+      "n": 14,
+      "p_value": 0.008117706397553255,
+      "rho": 0.6747252747252748
+    },
+    "prevalence_vs_precision": {
+      "n": 14,
+      "p_value": 0.04915991637198507,
+      "rho": 0.5340659340659341
+    },
+    "prevalence_vs_recall": {
+      "n": 14,
+      "p_value": 0.0004322100649076796,
+      "rho": 0.8109890109890111
+    }
+  },
+  "most_common_5": [
+    {
+      "class": "Infiltration",
+      "negative_to_positive_ratio": 4.5790356654653905,
+      "train_negative_count": 73695,
+      "train_positive_count": 16094,
+      "train_prevalence": 0.1792424461793761,
+      "train_total_count": 89789
+    },
+    {
+      "class": "Effusion",
+      "negative_to_positive_ratio": 7.385225999252895,
+      "train_negative_count": 79081,
+      "train_positive_count": 10708,
+      "train_prevalence": 0.11925737005646571,
+      "train_total_count": 89789
+    },
+    {
+      "class": "Atelectasis",
+      "negative_to_positive_ratio": 8.73428013876843,
+      "train_negative_count": 80565,
+      "train_positive_count": 9224,
+      "train_prevalence": 0.10272973304079565,
+      "train_total_count": 89789
+    },
+    {
+      "class": "Nodule",
+      "negative_to_positive_ratio": 16.907658556043078,
+      "train_negative_count": 84775,
+      "train_positive_count": 5014,
+      "train_prevalence": 0.055842029647284186,
+      "train_total_count": 89789
+    },
+    {
+      "class": "Mass",
+      "negative_to_positive_ratio": 18.56613641316191,
+      "train_negative_count": 85200,
+      "train_positive_count": 4589,
+      "train_prevalence": 0.05110871042109835,
+      "train_total_count": 89789
+    }
+  ],
+  "overall": {
+    "test": {
+      "f1_tuned": {
+        "macro_f1": 0.31319406497826924,
+        "micro_f1": 0.362501258684926,
+        "sample_f1": 0.15894632646886128
+      },
+      "macro_auprc": 0.2586440597698752,
+      "micro_auprc": 0.33930907942615096
+    },
+    "validation": {
+      "f1_at_0_5": {
+        "macro_f1": 0.14094662539118621,
+        "micro_f1": 0.22895365504061158,
+        "sample_f1": 0.07522533863739363
+      },
+      "f1_tuned": {
+        "macro_f1": 0.3308262685150321,
+        "micro_f1": 0.37472726428670905,
+        "sample_f1": 0.17206058393492302
+      },
+      "macro_auprc": 0.26117061604133557,
+      "micro_auprc": 0.34477704925794944
+    }
+  },
+  "patterns": {
+    "cutoffs": {
+      "auprc_q1": 0.16717475162266093,
+      "auroc_median": 0.8258928403963892,
+      "f1_q1": 0.191004285110749,
+      "precision_median": 0.2902521150388009,
+      "precision_q1": 0.13243563685636855,
+      "prevalence_q1": 0.02104934902939113,
+      "recall_median": 0.3790266328471782,
+      "recall_q1": 0.31851593419575874
+    },
+    "flags": {
+      "high_auroc_low_f1": [
+        "Hernia"
+      ],
+      "high_precision_low_recall": [],
+      "high_recall_low_precision": [
+        "Consolidation"
+      ],
+      "low_auroc_auprc_f1": [
+        "Consolidation",
+        "Fibrosis",
+        "Pneumonia"
+      ],
+      "low_prevalence_bottom_f1_overlap": [
+        "Fibrosis",
+        "Hernia",
+        "Pneumonia"
+      ],
+      "lowest_quartile_prevalence": [
+        "Edema",
+        "Fibrosis",
+        "Hernia",
+        "Pneumonia"
+      ]
+    }
+  },
+  "rankings": {
+    "test_auprc_lowest_5": [
+      {
+        "auprc": 0.033655185986857364,
+        "auroc": 0.7705876438905177,
+        "class": "Pneumonia",
+        "f1": 0.0741687979539642,
+        "negative_to_positive_ratio": 75.80838323353294,
+        "positive_support": 107,
+        "precision": 0.04296296296296296,
+        "prevalence": 0.009742329053992534,
+        "recall": 0.27102803738317754,
+        "threshold": 0.03125,
+        "total_count": 10983,
+        "train_positive_count": 1169,
+        "train_prevalence": 0.013019412177438216
+      },
+      {
+        "auprc": 0.08950603578127801,
+        "auroc": 0.8121798402803925,
+        "class": "Fibrosis",
+        "f1": 0.13870967741935483,
+        "negative_to_positive_ratio": 64.53941605839417,
+        "positive_support": 159,
+        "precision": 0.09327548806941431,
+        "prevalence": 0.01447691887462442,
+        "recall": 0.27044025157232704,
+        "threshold": 0.05718994140625,
+        "total_count": 10983,
+        "train_positive_count": 1370,
+        "train_prevalence": 0.0152579937408814
+      },
+      {
+        "auprc": 0.1243233498064552,
+        "auroc": 0.7910297234645607,
+        "class": "Consolidation",
+        "f1": 0.17989417989417988,
+        "negative_to_positive_ratio": 22.63490392208476,
+        "positive_support": 380,
+        "precision": 0.11582134746404239,
+        "prevalence": 0.034598925612309935,
+        "recall": 0.4026315789473684,
+        "threshold": 0.1190185546875,
+        "total_count": 10983,
+        "train_positive_count": 3799,
+        "train_prevalence": 0.04231030527124704
+      },
+      {
+        "auprc": 0.15862550932049072,
+        "auroc": 0.8025879690011573,
+        "class": "Pleural_Thickening",
+        "f1": 0.22433460076045628,
+        "negative_to_positive_ratio": 31.74580598103574,
+        "positive_support": 332,
+        "precision": 0.1638888888888889,
+        "prevalence": 0.03022853500864973,
+        "recall": 0.35542168674698793,
+        "threshold": 0.0965576171875,
+        "total_count": 10983,
+        "train_positive_count": 2742,
+        "train_prevalence": 0.030538261925180145
+      },
+      {
+        "auprc": 0.19282247852917161,
+        "auroc": 0.9107715899431823,
+        "class": "Edema",
+        "f1": 0.2857142857142857,
+        "negative_to_positive_ratio": 46.88746666666667,
+        "positive_support": 209,
+        "precision": 0.26422764227642276,
+        "prevalence": 0.019029409086770463,
+        "recall": 0.31100478468899523,
+        "threshold": 0.109130859375,
+        "total_count": 10983,
+        "train_positive_count": 1875,
+        "train_prevalence": 0.02088229070376104
+      }
+    ],
+    "test_auroc_lowest_5": [
+      {
+        "auprc": 0.34710655612121943,
+        "auroc": 0.7240040849638448,
+        "class": "Infiltration",
+        "f1": 0.39848017098076466,
+        "negative_to_positive_ratio": 4.5790356654653905,
+        "positive_support": 1790,
+        "precision": 0.3465510119785213,
+        "prevalence": 0.16297914959482837,
+        "recall": 0.46871508379888266,
+        "threshold": 0.295654296875,
+        "total_count": 10983,
+        "train_positive_count": 16094,
+        "train_prevalence": 0.1792424461793761
+      },
+      {
+        "auprc": 0.033655185986857364,
+        "auroc": 0.7705876438905177,
+        "class": "Pneumonia",
+        "f1": 0.0741687979539642,
+        "negative_to_positive_ratio": 75.80838323353294,
+        "positive_support": 107,
+        "precision": 0.04296296296296296,
+        "prevalence": 0.009742329053992534,
+        "recall": 0.27102803738317754,
+        "threshold": 0.03125,
+        "total_count": 10983,
+        "train_positive_count": 1169,
+        "train_prevalence": 0.013019412177438216
+      },
+      {
+        "auprc": 0.23883418766751988,
+        "auroc": 0.7761543837015534,
+        "class": "Nodule",
+        "f1": 0.29844699527346386,
+        "negative_to_positive_ratio": 16.907658556043078,
+        "positive_support": 648,
+        "precision": 0.2653061224489796,
+        "prevalence": 0.05900027314941273,
+        "recall": 0.3410493827160494,
+        "threshold": 0.13134765625,
+        "total_count": 10983,
+        "train_positive_count": 5014,
+        "train_prevalence": 0.055842029647284186
+      },
+      {
+        "auprc": 0.1243233498064552,
+        "auroc": 0.7910297234645607,
+        "class": "Consolidation",
+        "f1": 0.17989417989417988,
+        "negative_to_positive_ratio": 22.63490392208476,
+        "positive_support": 380,
+        "precision": 0.11582134746404239,
+        "prevalence": 0.034598925612309935,
+        "recall": 0.4026315789473684,
+        "threshold": 0.1190185546875,
+        "total_count": 10983,
+        "train_positive_count": 3799,
+        "train_prevalence": 0.04231030527124704
+      },
+      {
+        "auprc": 0.15862550932049072,
+        "auroc": 0.8025879690011573,
+        "class": "Pleural_Thickening",
+        "f1": 0.22433460076045628,
+        "negative_to_positive_ratio": 31.74580598103574,
+        "positive_support": 332,
+        "precision": 0.1638888888888889,
+        "prevalence": 0.03022853500864973,
+        "recall": 0.35542168674698793,
+        "threshold": 0.0965576171875,
+        "total_count": 10983,
+        "train_positive_count": 2742,
+        "train_prevalence": 0.030538261925180145
+      }
+    ],
+    "test_f1_lowest_5": [
+      {
+        "auprc": 0.033655185986857364,
+        "auroc": 0.7705876438905177,
+        "class": "Pneumonia",
+        "f1": 0.0741687979539642,
+        "negative_to_positive_ratio": 75.80838323353294,
+        "positive_support": 107,
+        "precision": 0.04296296296296296,
+        "prevalence": 0.009742329053992534,
+        "recall": 0.27102803738317754,
+        "threshold": 0.03125,
+        "total_count": 10983,
+        "train_positive_count": 1169,
+        "train_prevalence": 0.013019412177438216
+      },
+      {
+        "auprc": 0.08950603578127801,
+        "auroc": 0.8121798402803925,
+        "class": "Fibrosis",
+        "f1": 0.13870967741935483,
+        "negative_to_positive_ratio": 64.53941605839417,
+        "positive_support": 159,
+        "precision": 0.09327548806941431,
+        "prevalence": 0.01447691887462442,
+        "recall": 0.27044025157232704,
+        "threshold": 0.05718994140625,
+        "total_count": 10983,
+        "train_positive_count": 1370,
+        "train_prevalence": 0.0152579937408814
+      },
+      {
+        "auprc": 0.2148572855058341,
+        "auroc": 0.8396058405123858,
+        "class": "Hernia",
+        "f1": 0.1724137931034483,
+        "negative_to_positive_ratio": 567.2848101265823,
+        "positive_support": 17,
+        "precision": 0.12195121951219512,
+        "prevalence": 0.001547846672129655,
+        "recall": 0.29411764705882354,
+        "threshold": 0.0068511962890625,
+        "total_count": 10983,
+        "train_positive_count": 158,
+        "train_prevalence": 0.0017596810299702636
+      },
+      {
+        "auprc": 0.1243233498064552,
+        "auroc": 0.7910297234645607,
+        "class": "Consolidation",
+        "f1": 0.17989417989417988,
+        "negative_to_positive_ratio": 22.63490392208476,
+        "positive_support": 380,
+        "precision": 0.11582134746404239,
+        "prevalence": 0.034598925612309935,
+        "recall": 0.4026315789473684,
+        "threshold": 0.1190185546875,
+        "total_count": 10983,
+        "train_positive_count": 3799,
+        "train_prevalence": 0.04231030527124704
+      },
+      {
+        "auprc": 0.15862550932049072,
+        "auroc": 0.8025879690011573,
+        "class": "Pleural_Thickening",
+        "f1": 0.22433460076045628,
+        "negative_to_positive_ratio": 31.74580598103574,
+        "positive_support": 332,
+        "precision": 0.1638888888888889,
+        "prevalence": 0.03022853500864973,
+        "recall": 0.35542168674698793,
+        "threshold": 0.0965576171875,
+        "total_count": 10983,
+        "train_positive_count": 2742,
+        "train_prevalence": 0.030538261925180145
+      }
+    ],
+    "test_precision_lowest_5": [
+      {
+        "auprc": 0.033655185986857364,
+        "auroc": 0.7705876438905177,
+        "class": "Pneumonia",
+        "f1": 0.0741687979539642,
+        "negative_to_positive_ratio": 75.80838323353294,
+        "positive_support": 107,
+        "precision": 0.04296296296296296,
+        "prevalence": 0.009742329053992534,
+        "recall": 0.27102803738317754,
+        "threshold": 0.03125,
+        "total_count": 10983,
+        "train_positive_count": 1169,
+        "train_prevalence": 0.013019412177438216
+      },
+      {
+        "auprc": 0.08950603578127801,
+        "auroc": 0.8121798402803925,
+        "class": "Fibrosis",
+        "f1": 0.13870967741935483,
+        "negative_to_positive_ratio": 64.53941605839417,
+        "positive_support": 159,
+        "precision": 0.09327548806941431,
+        "prevalence": 0.01447691887462442,
+        "recall": 0.27044025157232704,
+        "threshold": 0.05718994140625,
+        "total_count": 10983,
+        "train_positive_count": 1370,
+        "train_prevalence": 0.0152579937408814
+      },
+      {
+        "auprc": 0.1243233498064552,
+        "auroc": 0.7910297234645607,
+        "class": "Consolidation",
+        "f1": 0.17989417989417988,
+        "negative_to_positive_ratio": 22.63490392208476,
+        "positive_support": 380,
+        "precision": 0.11582134746404239,
+        "prevalence": 0.034598925612309935,
+        "recall": 0.4026315789473684,
+        "threshold": 0.1190185546875,
+        "total_count": 10983,
+        "train_positive_count": 3799,
+        "train_prevalence": 0.04231030527124704
+      },
+      {
+        "auprc": 0.2148572855058341,
+        "auroc": 0.8396058405123858,
+        "class": "Hernia",
+        "f1": 0.1724137931034483,
+        "negative_to_positive_ratio": 567.2848101265823,
+        "positive_support": 17,
+        "precision": 0.12195121951219512,
+        "prevalence": 0.001547846672129655,
+        "recall": 0.29411764705882354,
+        "threshold": 0.0068511962890625,
+        "total_count": 10983,
+        "train_positive_count": 158,
+        "train_prevalence": 0.0017596810299702636
+      },
+      {
+        "auprc": 0.15862550932049072,
+        "auroc": 0.8025879690011573,
+        "class": "Pleural_Thickening",
+        "f1": 0.22433460076045628,
+        "negative_to_positive_ratio": 31.74580598103574,
+        "positive_support": 332,
+        "precision": 0.1638888888888889,
+        "prevalence": 0.03022853500864973,
+        "recall": 0.35542168674698793,
+        "threshold": 0.0965576171875,
+        "total_count": 10983,
+        "train_positive_count": 2742,
+        "train_prevalence": 0.030538261925180145
+      }
+    ],
+    "test_recall_lowest_5": [
+      {
+        "auprc": 0.08950603578127801,
+        "auroc": 0.8121798402803925,
+        "class": "Fibrosis",
+        "f1": 0.13870967741935483,
+        "negative_to_positive_ratio": 64.53941605839417,
+        "positive_support": 159,
+        "precision": 0.09327548806941431,
+        "prevalence": 0.01447691887462442,
+        "recall": 0.27044025157232704,
+        "threshold": 0.05718994140625,
+        "total_count": 10983,
+        "train_positive_count": 1370,
+        "train_prevalence": 0.0152579937408814
+      },
+      {
+        "auprc": 0.033655185986857364,
+        "auroc": 0.7705876438905177,
+        "class": "Pneumonia",
+        "f1": 0.0741687979539642,
+        "negative_to_positive_ratio": 75.80838323353294,
+        "positive_support": 107,
+        "precision": 0.04296296296296296,
+        "prevalence": 0.009742329053992534,
+        "recall": 0.27102803738317754,
+        "threshold": 0.03125,
+        "total_count": 10983,
+        "train_positive_count": 1169,
+        "train_prevalence": 0.013019412177438216
+      },
+      {
+        "auprc": 0.2148572855058341,
+        "auroc": 0.8396058405123858,
+        "class": "Hernia",
+        "f1": 0.1724137931034483,
+        "negative_to_positive_ratio": 567.2848101265823,
+        "positive_support": 17,
+        "precision": 0.12195121951219512,
+        "prevalence": 0.001547846672129655,
+        "recall": 0.29411764705882354,
+        "threshold": 0.0068511962890625,
+        "total_count": 10983,
+        "train_positive_count": 158,
+        "train_prevalence": 0.0017596810299702636
+      },
+      {
+        "auprc": 0.19282247852917161,
+        "auroc": 0.9107715899431823,
+        "class": "Edema",
+        "f1": 0.2857142857142857,
+        "negative_to_positive_ratio": 46.88746666666667,
+        "positive_support": 209,
+        "precision": 0.26422764227642276,
+        "prevalence": 0.019029409086770463,
+        "recall": 0.31100478468899523,
+        "threshold": 0.109130859375,
+        "total_count": 10983,
+        "train_positive_count": 1875,
+        "train_prevalence": 0.02088229070376104
+      },
+      {
+        "auprc": 0.23883418766751988,
+        "auroc": 0.7761543837015534,
+        "class": "Nodule",
+        "f1": 0.29844699527346386,
+        "negative_to_positive_ratio": 16.907658556043078,
+        "positive_support": 648,
+        "precision": 0.2653061224489796,
+        "prevalence": 0.05900027314941273,
+        "recall": 0.3410493827160494,
+        "threshold": 0.13134765625,
+        "total_count": 10983,
+        "train_positive_count": 5014,
+        "train_prevalence": 0.055842029647284186
+      }
+    ],
+    "test_threshold_lowest_5": [
+      {
+        "auprc": 0.2148572855058341,
+        "auroc": 0.8396058405123858,
+        "class": "Hernia",
+        "f1": 0.1724137931034483,
+        "negative_to_positive_ratio": 567.2848101265823,
+        "positive_support": 17,
+        "precision": 0.12195121951219512,
+        "prevalence": 0.001547846672129655,
+        "recall": 0.29411764705882354,
+        "threshold": 0.0068511962890625,
+        "total_count": 10983,
+        "train_positive_count": 158,
+        "train_prevalence": 0.0017596810299702636
+      },
+      {
+        "auprc": 0.033655185986857364,
+        "auroc": 0.7705876438905177,
+        "class": "Pneumonia",
+        "f1": 0.0741687979539642,
+        "negative_to_positive_ratio": 75.80838323353294,
+        "positive_support": 107,
+        "precision": 0.04296296296296296,
+        "prevalence": 0.009742329053992534,
+        "recall": 0.27102803738317754,
+        "threshold": 0.03125,
+        "total_count": 10983,
+        "train_positive_count": 1169,
+        "train_prevalence": 0.013019412177438216
+      },
+      {
+        "auprc": 0.08950603578127801,
+        "auroc": 0.8121798402803925,
+        "class": "Fibrosis",
+        "f1": 0.13870967741935483,
+        "negative_to_positive_ratio": 64.53941605839417,
+        "positive_support": 159,
+        "precision": 0.09327548806941431,
+        "prevalence": 0.01447691887462442,
+        "recall": 0.27044025157232704,
+        "threshold": 0.05718994140625,
+        "total_count": 10983,
+        "train_positive_count": 1370,
+        "train_prevalence": 0.0152579937408814
+      },
+      {
+        "auprc": 0.15862550932049072,
+        "auroc": 0.8025879690011573,
+        "class": "Pleural_Thickening",
+        "f1": 0.22433460076045628,
+        "negative_to_positive_ratio": 31.74580598103574,
+        "positive_support": 332,
+        "precision": 0.1638888888888889,
+        "prevalence": 0.03022853500864973,
+        "recall": 0.35542168674698793,
+        "threshold": 0.0965576171875,
+        "total_count": 10983,
+        "train_positive_count": 2742,
+        "train_prevalence": 0.030538261925180145
+      },
+      {
+        "auprc": 0.19282247852917161,
+        "auroc": 0.9107715899431823,
+        "class": "Edema",
+        "f1": 0.2857142857142857,
+        "negative_to_positive_ratio": 46.88746666666667,
+        "positive_support": 209,
+        "precision": 0.26422764227642276,
+        "prevalence": 0.019029409086770463,
+        "recall": 0.31100478468899523,
+        "threshold": 0.109130859375,
+        "total_count": 10983,
+        "train_positive_count": 1875,
+        "train_prevalence": 0.02088229070376104
+      }
+    ]
+  },
+  "rarest_5": [
+    {
+      "class": "Hernia",
+      "negative_to_positive_ratio": 567.2848101265823,
+      "train_negative_count": 89631,
+      "train_positive_count": 158,
+      "train_prevalence": 0.0017596810299702636,
+      "train_total_count": 89789
+    },
+    {
+      "class": "Pneumonia",
+      "negative_to_positive_ratio": 75.80838323353294,
+      "train_negative_count": 88620,
+      "train_positive_count": 1169,
+      "train_prevalence": 0.013019412177438216,
+      "train_total_count": 89789
+    },
+    {
+      "class": "Fibrosis",
+      "negative_to_positive_ratio": 64.53941605839417,
+      "train_negative_count": 88419,
+      "train_positive_count": 1370,
+      "train_prevalence": 0.0152579937408814,
+      "train_total_count": 89789
+    },
+    {
+      "class": "Edema",
+      "negative_to_positive_ratio": 46.88746666666667,
+      "train_negative_count": 87914,
+      "train_positive_count": 1875,
+      "train_prevalence": 0.02088229070376104,
+      "train_total_count": 89789
+    },
+    {
+      "class": "Emphysema",
+      "negative_to_positive_ratio": 45.40258397932816,
+      "train_negative_count": 87854,
+      "train_positive_count": 1935,
+      "train_prevalence": 0.021550524006281394,
+      "train_total_count": 89789
+    }
+  ]
+}

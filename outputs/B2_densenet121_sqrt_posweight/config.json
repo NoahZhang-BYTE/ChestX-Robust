@@ -1,0 +1,48 @@
+{
+  "data": {
+    "batch_size": 32,
+    "csv_path": "data/labels.csv",
+    "image_col": "path",
+    "image_root": "data/raw/images",
+    "image_size": 224,
+    "label_cols": [
+      "Atelectasis",
+      "Cardiomegaly",
+      "Effusion",
+      "Infiltration",
+      "Mass",
+      "Nodule",
+      "Pneumonia",
+      "Pneumothorax",
+      "Consolidation",
+      "Edema",
+      "Emphysema",
+      "Fibrosis",
+      "Pleural_Thickening",
+      "Hernia"
+    ],
+    "num_workers": 0,
+    "persistent_workers": false,
+    "prefetch_factor": null,
+    "val_split": 0.2
+  },
+  "device": "auto",
+  "model": {
+    "name": "densenet121",
+    "pretrained": true
+  },
+  "output_dir": "outputs/B2_densenet121_sqrt_posweight",
+  "seed": 42,
+  "training": {
+    "amp": true,
+    "epochs": 10,
+    "learning_rate": 0.0003,
+    "loss": {
+      "cap": 20.0,
+      "name": "bce_sqrt_pos_weight"
+    },
+    "scheduler": "none",
+    "threshold": 0.5,
+    "weight_decay": 0.0001
+  }
+}

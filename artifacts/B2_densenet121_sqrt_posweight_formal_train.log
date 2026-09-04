@@ -1,0 +1,17 @@
+loss=bce_sqrt_pos_weight count_source=train cap=20.0 pos_weight_device=cuda:0 pos_weight_path=outputs\B2_densenet121_sqrt_posweight\pos_weights.csv
+             class  positive_count  negative_count  negative_to_positive_ratio  sqrt_ratio  pos_weight
+       Atelectasis            9224           80565                    8.734281    2.955382    2.955382
+      Cardiomegaly            2242           87547                   39.048618    6.248889    6.248889
+          Effusion           10708           79081                    7.385226    2.717577    2.717577
+      Infiltration           16094           73695                    4.579036    2.139868    2.139868
+              Mass            4589           85200                   18.566137    4.308844    4.308844
+            Nodule            5014           84775                   16.907658    4.111892    4.111892
+         Pneumonia            1169           88620                   75.808380    8.706800    8.706800
+      Pneumothorax            4203           85586                   20.363073    4.512546    4.512546
+     Consolidation            3799           85990                   22.634905    4.757616    4.757616
+             Edema            1875           87914                   46.887466    6.847442    6.847442
+         Emphysema            1935           87854                   45.402584    6.738144    6.738144
+          Fibrosis            1370           88419                   64.539413    8.033643    8.033643
+Pleural_Thickening            2742           87047                   31.745806    5.634342    5.634342
+            Hernia             158           89631                  567.284790   23.817741   20.000000
+formal=densenet121 device=cuda labels=14 batch_size=32

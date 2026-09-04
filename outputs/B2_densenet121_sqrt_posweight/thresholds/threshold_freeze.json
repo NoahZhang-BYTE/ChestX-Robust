@@ -1,0 +1,9 @@
+{
+  "checkpoint": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\outputs\\B2_densenet121_sqrt_posweight\\best.pt",
+  "checkpoint_epoch": 9,
+  "fit_split": "val",
+  "frozen_thresholds_path": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\outputs\\B2_densenet121_sqrt_posweight\\thresholds\\thresholds_frozen_for_test.json",
+  "sha256": "a13ace4b6f4cf3bdd30026f40b6670aff86fae6bd124ad0fef5cf4779a07e290",
+  "status": "frozen",
+  "test_used_for_tuning": false
+}

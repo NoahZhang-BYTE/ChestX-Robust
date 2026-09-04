@@ -1,0 +1,31 @@
+{
+  "analysis": "Spearman rank correlation across 14 labels; descriptive only, not causal.",
+  "outcomes": {
+    "prevalence_vs_auprc": {
+      "n": 14,
+      "p_value": 0.010661967747329814,
+      "rho": 0.6571428571428571
+    },
+    "prevalence_vs_auroc": {
+      "n": 14,
+      "p_value": 0.4364347945560527,
+      "rho": -0.22637362637362637
+    },
+    "prevalence_vs_f1": {
+      "n": 14,
+      "p_value": 0.008117706397553255,
+      "rho": 0.6747252747252748
+    },
+    "prevalence_vs_precision": {
+      "n": 14,
+      "p_value": 0.04915991637198507,
+      "rho": 0.5340659340659341
+    },
+    "prevalence_vs_recall": {
+      "n": 14,
+      "p_value": 0.0004322100649076796,
+      "rho": 0.8109890109890111
+    }
+  },
+  "predictor": "train_prevalence"
+}

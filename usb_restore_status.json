@@ -1,0 +1,10 @@
+{
+    "started":  "2026-09-03T21:44:51.6927366+08:00",
+    "status":  "PASS",
+    "drive_letter":  "E",
+    "filesystem":  "exFAT",
+    "label":  "USB",
+    "size_gb":  117.18,
+    "free_gb":  117.18,
+    "finished":  "2026-09-03T21:44:58.0891781+08:00"
+}

@@ -1,0 +1,1 @@
+TrainingSmokeResult(loss_name='bce', batches=2, mean_loss=0.7439674437046051, pos_weight=None)

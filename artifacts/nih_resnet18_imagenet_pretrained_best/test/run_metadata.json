@@ -1,0 +1,24 @@
+{
+  "amp_enabled": true,
+  "artifact_sha256": {
+    "test_per_class_metrics.csv": "3ab95696c479d69ece6e2362ac6e710ba734c2232d6552f183b48cae6c03b588",
+    "test_probabilities.npy": "918c80678071f24c3f655a8dba5e056bef60e66e879b83ab239ed094da1c8d87",
+    "test_summary.json": "6800bfc2237bb24c45748df32e8275d18c907ab07d8b4abae6250c0379a7eb8c",
+    "test_targets.npy": "31fc0386b4b0b2b1d79fc266500c3b1a12aa919f17a4418720925a2465416d1b"
+  },
+  "checkpoint_sha256": "be8ef6905f358488ed6d5dd2da8879c656084ee5d184795587a5ccef3584b972",
+  "cuda_version": "12.8",
+  "device": "cuda",
+  "evaluation_protocol_sha256": "268a9762b98c73a08bce0ca3c53b6c866d4a92dacbfd6bc5fcbaa26b8546a8c0",
+  "evaluation_timestamp_utc": "2026-08-30T07:57:19.698857+00:00",
+  "gpu_name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+  "labels_csv_sha256": "c0b1784dce4215b12396d2e610d70469f91b0c068d6096081fbfee184df93318",
+  "numpy_version": "2.5.2",
+  "python_version": "3.12.10",
+  "pytorch_version": "2.11.0+cu128",
+  "schema_version": 1,
+  "scikit_learn_version": "1.9.0",
+  "stage": "independent_test_evaluation",
+  "thresholds_sha256": "1439f8f474156616453ac7d7254c503c0d002f222bd9ca336b3050af205adf12",
+  "torchvision_version": "0.26.0+cu128"
+}

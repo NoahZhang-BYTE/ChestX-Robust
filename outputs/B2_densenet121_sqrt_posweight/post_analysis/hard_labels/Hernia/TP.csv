@@ -1,0 +1,7 @@
+image_path,probability,ground_truth,predicted,threshold,coexisting_labels,error_type
+images_004/images/00007887_000.png,1.0,1,1,0.73,[],TP
+images_004/images/00008885_007.png,0.99169921875,1,1,0.73,"[""Atelectasis"", ""Fibrosis""]",TP
+images_006/images/00013679_000.png,0.99951171875,1,1,0.73,"[""Atelectasis""]",TP
+images_006/images/00013679_001.png,0.9951171875,1,1,0.73,[],TP
+images_008/images/00018120_000.png,0.9150390625,1,1,0.73,[],TP
+images_010/images/00021943_000.png,0.98779296875,1,1,0.73,[],TP

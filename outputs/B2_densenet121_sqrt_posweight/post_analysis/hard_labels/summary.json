@@ -1,0 +1,8 @@
+{
+  "labels": {
+    "Hernia": 10983,
+    "Infiltration": 10983,
+    "Pneumonia": 10983
+  },
+  "threshold_source": "validation"
+}

@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "method": "weighted_average_of_frozen_sigmoid_probabilities",
+  "weights_tested": [
+    {
+      "b4": 0.7,
+      "b5": 0.30000000000000004
+    },
+    {
+      "b4": 0.6,
+      "b5": 0.4
+    },
+    {
+      "b4": 0.5,
+      "b5": 0.5
+    },
+    {
+      "b4": 0.4,
+      "b5": 0.6
+    },
+    {
+      "b4": 0.3,
+      "b5": 0.7
+    }
+  ],
+  "selection_rule": "validation_macro_auroc_maximize",
+  "selected_weights": {
+    "b4": 0.4,
+    "b5": 0.6
+  },
+  "threshold_source": "validation",
+  "test_used_for_selection_or_tuning": false,
+  "split_counts": {
+    "test": 10983,
+    "train": 89789,
+    "val": 11348
+  },
+  "label_cols": [
+    "Atelectasis",
+    "Cardiomegaly",
+    "Effusion",
+    "Infiltration",
+    "Mass",
+    "Nodule",
+    "Pneumonia",
+    "Pneumothorax",
+    "Consolidation",
+    "Edema",
+    "Emphysema",
+    "Fibrosis",
+    "Pleural_Thickening",
+    "Hernia"
+  ],
+  "sources": {
+    "b4_eval_dir": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B4_densenet121_sqrt_posweight_scheduler_eval_20260904_025154",
+    "b5_eval_dir": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B5_densenet121_asl_eval_20260904_1200",
+    "b4_protocol_sha256": "fc4ac4f6c0e8fb1407a09348713b0c84e242c838bb4afff39ae3e8c6fd547f23",
+    "b5_protocol_sha256": "1143fbadd9cdd50a8b7838ba23143de9ad88757f85bc13f26b4da9f15b486fdc"
+  },
+  "created_at_utc": "2026-09-04T09:56:54.766880+00:00"
+}

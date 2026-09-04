@@ -10,13 +10,13 @@
   "B3_threshold_tuning": "completed",
   "B3_training": "completed",
   "B4_analysis": "pending",
-  "B4_training": "running",
+  "B4_training": "completed",
   "B5_confirmation": "pending",
   "cooccurrence_analysis": "completed",
-  "current_stage": "B4_training",
+  "current_stage": "B3_test",
   "final_test": "pending",
   "hard_label_analysis": "completed",
-  "last_update": "2026-09-01T10:39:53.899096+00:00",
+  "last_update": "2026-09-04T03:58:25.043594+00:00",
   "night_mode": {
     "b5_forbidden": true,
     "initialized": true,
@@ -34,7 +34,7 @@
   },
   "recovery_count": {
     "B3_training": 2,
-    "B4_training": 0
+    "B4_training": 1
   },
   "stages": {
     "B2_analysis": "completed",
@@ -48,7 +48,7 @@
     "B3_threshold_tuning": "completed",
     "B3_training": "completed",
     "B4_analysis": "pending",
-    "B4_training": "running",
+    "B4_training": "completed",
     "B5_confirmation": "pending",
     "cooccurrence_analysis": "completed",
     "final_test": "pending",

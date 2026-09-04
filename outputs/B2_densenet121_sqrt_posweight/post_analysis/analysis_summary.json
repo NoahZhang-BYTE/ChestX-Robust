@@ -1,0 +1,40 @@
+{
+  "auditable_history_epochs": "3-10",
+  "best_epoch_macro_auprc": 9,
+  "best_epoch_macro_auroc": 9,
+  "best_epoch_macro_f1_fixed05": 8,
+  "best_macro_auprc": 0.2681604423370506,
+  "best_macro_auroc": 0.8373033352839379,
+  "best_macro_f1_fixed05": 0.314957914937216,
+  "checkpoint": "outputs\\B2_densenet121_sqrt_posweight\\last.pt",
+  "completed_epoch": 10,
+  "epoch_10_validation_degradation": {
+    "vs_epoch_9_macro_auprc_delta": -0.008466399817760095,
+    "vs_epoch_9_macro_auroc_delta": -0.006306121065589587,
+    "vs_epoch_9_val_loss_delta": 0.01172750836364983
+  },
+  "experiment": "B2",
+  "final_train_val_loss_gap": 0.09696504889781993,
+  "interpretation": "AUROC/AUPRC trends are threshold-independent; fixed-0.5 F1 is reported separately.",
+  "label_mapping": {
+    "label_0": "Atelectasis",
+    "label_1": "Cardiomegaly",
+    "label_10": "Emphysema",
+    "label_11": "Fibrosis",
+    "label_12": "Pleural_Thickening",
+    "label_13": "Hernia",
+    "label_2": "Effusion",
+    "label_3": "Infiltration",
+    "label_4": "Mass",
+    "label_5": "Nodule",
+    "label_6": "Pneumonia",
+    "label_7": "Pneumothorax",
+    "label_8": "Consolidation",
+    "label_9": "Edema"
+  },
+  "last_3_epoch_macro_auprc_delta": -0.0037764053610274684,
+  "last_3_epoch_macro_auroc_delta": -0.006186168432588124,
+  "minimum_val_loss": 0.3939692331717642,
+  "minimum_val_loss_epoch": 5,
+  "overfitting_detected": true
+}

@@ -1,0 +1,25 @@
+{
+  "status": "blocked",
+  "reason": "system_bluescreen_during_resume",
+  "launch": {
+    "timestamp": "2026-09-02T14:43:04+08:00",
+    "launcher_pid": 8844,
+    "training_process_pid": 8520,
+    "resume_from_epoch": 6,
+    "resume_to_epoch": 7
+  },
+  "durable_state_after_crash": {
+    "last_epoch": 6,
+    "history_unchanged": true,
+    "test_used": false
+  },
+  "system_events": {
+    "kernel_power_41": "2026-09-02T14:45:06+08:00",
+    "wer_bluescreen": "2026-09-02T14:48:28+08:00",
+    "bugcheck_parameter_p1": "0x50",
+    "bugcheck_interpretation": "PAGE_FAULT_IN_NONPAGED_AREA",
+    "minidump": "C:\\windows\\Minidump\\090226-32250-01.dmp"
+  },
+  "training_stderr": "empty",
+  "action": "no_retry_without_system_diagnosis"
+}

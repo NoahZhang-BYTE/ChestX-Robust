@@ -1,0 +1,22 @@
+{
+  "checkpoint_sha256": "3eacaa2c0e6e81b6853bf7aea9c291c7f34f1aabe4ceff6766977c99a9072ad0",
+  "evaluation_protocol_sha256": "8aa04e2bc7b2098b5d33ab8d72d7048b941c8ed2cc200bdb7440e9508f4e11c0",
+  "evaluation_timestamp_utc": "2026-08-30T13:02:41.320959+00:00",
+  "labels_csv_sha256": "c0b1784dce4215b12396d2e610d70469f91b0c068d6096081fbfee184df93318",
+  "macro_auprc": 0.2273070146250397,
+  "macro_auroc": 0.8235783024242843,
+  "macro_f1_at_0.5": 0.16135007256426687,
+  "macro_f1_tuned": 0.28116074067725083,
+  "micro_auprc": 0.31473099613610817,
+  "micro_auroc": 0.8680806533722678,
+  "micro_f1_at_0.5": 0.24433249370277077,
+  "micro_f1_tuned": 0.3504677403799788,
+  "num_classes": 14,
+  "sample_count": 10983,
+  "sample_f1_at_0.5": 0.0814956447843637,
+  "sample_f1_tuned": 0.1608489389150411,
+  "schema_version": 1,
+  "split": "test",
+  "test_used_for_tuning": false,
+  "thresholds_sha256": "87480aba2bfe22230d07bc859ff3c0d2c027a934c6cbcc6ff5b6b8511ba95e25"
+}

@@ -1,0 +1,15 @@
+{
+  "macro_AUPRC": 0.2697229081966683,
+  "macro_AUROC": 0.8324673595811959,
+  "macro_F1_fixed05": 0.3111143046581438,
+  "macro_F1_tuned": 0.33303475460725723,
+  "micro_AUPRC": 0.34193505648840977,
+  "micro_AUROC": 0.8735507590991387,
+  "micro_F1_fixed05": 0.378493414712496,
+  "micro_F1_tuned": 0.3768011850787808,
+  "sample_F1_fixed05": 0.20928225174347836,
+  "sample_F1_tuned": 0.18671944023547832,
+  "sample_count": 11348,
+  "split": "val",
+  "threshold_independent_note": "AUROC and AUPRC do not change with threshold tuning."
+}

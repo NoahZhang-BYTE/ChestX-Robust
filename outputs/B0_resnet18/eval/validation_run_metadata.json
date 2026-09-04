@@ -1,0 +1,15 @@
+{
+  "amp_enabled": true,
+  "checkpoint_sha256": "3eacaa2c0e6e81b6853bf7aea9c291c7f34f1aabe4ceff6766977c99a9072ad0",
+  "cuda_version": "12.8",
+  "device": "cuda",
+  "gpu_name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+  "labels_csv_sha256": "c0b1784dce4215b12396d2e610d70469f91b0c068d6096081fbfee184df93318",
+  "numpy_version": "2.5.2",
+  "python_version": "3.12.10",
+  "pytorch_version": "2.11.0+cu128",
+  "schema_version": 1,
+  "scikit_learn_version": "1.9.0",
+  "stage": "formal_validation_threshold_freeze",
+  "torchvision_version": "0.26.0+cu128"
+}

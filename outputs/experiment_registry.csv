@@ -1,0 +1,2 @@
+experiment,backbone,resolution,loss,batch,lr,scheduler,epochs_completed,best_val_macro_auroc,best_val_macro_auprc,test_macro_auroc,test_macro_auprc,test_macro_f1_tuned,status,notes
+B2,densenet121,224,bce_sqrt_pos_weight,32,0.0003,none,8,,,,,running,"Current process still running; do not start duplicate"

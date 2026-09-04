@@ -1,0 +1,26 @@
+{
+  "status": "blocked",
+  "reason": "commit_exceeded_80_percent",
+  "threshold_crossing": {
+    "timestamp": "2026-09-02T03:31:19.0954265+08:00",
+    "commit_used_gb": 58.93,
+    "commit_limit_gb": 73.64,
+    "commit_percent": 80.03,
+    "ram_used_gb": 15.15,
+    "ram_total_gb": 31.64,
+    "process_id": 17828,
+    "process_working_set_gb": 1.88,
+    "gpu_query": "0, 2584, 8151"
+  },
+  "post_stop": {
+    "commit_used_gb": 52.65,
+    "commit_limit_gb": 73.64,
+    "commit_percent": 71.5,
+    "ram_used_gb": 13.21,
+    "ram_total_gb": 31.64
+  },
+  "last_epoch": 6,
+  "test_used": false,
+  "whea_last_12h": "none_returned",
+  "stderr": "empty"
+}

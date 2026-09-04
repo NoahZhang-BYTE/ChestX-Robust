@@ -1,0 +1,27 @@
+{
+  "checkpoint": "outputs\\B2_densenet121_sqrt_posweight\\best.pt",
+  "experiment": "B2",
+  "fixed05": {
+    "macro_F1": 0.3138921381020617,
+    "micro_F1": 0.36205955485475166,
+    "sample_F1": 0.15002402374705023
+  },
+  "frozen_thresholds_path": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\outputs\\B2_densenet121_sqrt_posweight\\thresholds\\thresholds_frozen_for_test.json",
+  "frozen_thresholds_sha256": "a13ace4b6f4cf3bdd30026f40b6670aff86fae6bd124ad0fef5cf4779a07e290",
+  "macro_AUPRC": 0.260723419364798,
+  "macro_AUROC": 0.8385204184210094,
+  "metrics": {
+    "macro_F1": 0.323168765870604,
+    "micro_F1": 0.36660971442518914,
+    "sample_F1": 0.1660473966128159
+  },
+  "micro_AUPRC": 0.3003347783600558,
+  "micro_AUROC": 0.8704659979459384,
+  "split": "test",
+  "test_used_for_tuning": false,
+  "tuned": {
+    "macro_F1": 0.323168765870604,
+    "micro_F1": 0.36660971442518914,
+    "sample_F1": 0.1660473966128159
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "macro_auprc": 0.2681604423370506,
+  "macro_auroc": 0.8373033352839379,
+  "selected_checkpoint": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\outputs\\B2_densenet121_sqrt_posweight\\best.pt",
+  "selected_epoch": 9,
+  "selection_reason": "best observed macro AUROC and macro AUPRC",
+  "test_used_for_selection": false
+}

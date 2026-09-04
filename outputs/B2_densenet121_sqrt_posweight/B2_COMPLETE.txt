@@ -1,0 +1,4 @@
+experiment=B2_densenet121_sqrt_posweight
+completed_epochs=10
+auditable_history_epochs=3-10
+status=completed

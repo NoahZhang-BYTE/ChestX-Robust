@@ -1,0 +1,47 @@
+{
+  "B1": {
+    "macro_auprc": 0.26117061604133557,
+    "macro_auroc": 0.8375888937898665,
+    "macro_f1_fixed05": 0.14094662539118621,
+    "macro_f1_tuned": 0.3263333001751009,
+    "micro_auprc": 0.34477704925794944,
+    "micro_auroc": 0.8768581634010273,
+    "micro_f1_fixed05": 0.22895365504061158,
+    "micro_f1_tuned": 0.3710680486705723,
+    "model": "B1_densenet121_bce",
+    "sample_count": 11348,
+    "sample_f1_fixed05": 0.07522533863739363,
+    "sample_f1_tuned": 0.17231575409668468
+  },
+  "B2": {
+    "macro_auprc": 0.2681640084567309,
+    "macro_auroc": 0.8373047194844901,
+    "macro_f1_fixed05": 0.3123386161981387,
+    "macro_f1_tuned": 0.3318033957627889,
+    "micro_auprc": 0.29873057097815703,
+    "micro_auroc": 0.8653999246309348,
+    "micro_f1_fixed05": 0.35010767312705426,
+    "micro_f1_tuned": 0.3732862766390661,
+    "model": "B2_densenet121_sqrt_posweight",
+    "sample_count": 11348,
+    "sample_f1_fixed05": 0.15068342928758863,
+    "sample_f1_tuned": 0.17994369776622154
+  },
+  "B2_minus_B1": {
+    "macro_auprc": 0.006993392415395316,
+    "macro_auroc": -0.0002841743053763057,
+    "macro_f1_fixed05": 0.17139199080695247,
+    "macro_f1_tuned": 0.005470095587687962,
+    "micro_auprc": -0.04604647827979241,
+    "micro_auroc": -0.011458238770092444,
+    "micro_f1_fixed05": 0.12115401808644269,
+    "micro_f1_tuned": 0.002218227968493802,
+    "sample_count": 0,
+    "sample_f1_fixed05": 0.075458090650195,
+    "sample_f1_tuned": 0.0076279436695368685
+  },
+  "same_targets_verified": true,
+  "split": "val",
+  "test_used": false,
+  "threshold_protocol": "per-label F1 grid 0.01..0.99; ties choose threshold nearest 0.5"
+}

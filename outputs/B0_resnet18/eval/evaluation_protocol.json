@@ -1,0 +1,84 @@
+{
+  "checkpoint": {
+    "epoch": 6,
+    "path": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\outputs\\B0_resnet18\\best.pt",
+    "sha256": "3eacaa2c0e6e81b6853bf7aea9c291c7f34f1aabe4ceff6766977c99a9072ad0",
+    "validation_macro_auroc": 0.8143533395791529
+  },
+  "checkpoint_selection_metric": "validation_macro_auroc",
+  "config": {
+    "sha256": "4ad232caf8db7ad7708df0f94dab6e6623e65126a618f92c7066f96d50c6c462",
+    "source": "checkpoint_embedded"
+  },
+  "image_root": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\data\\raw\\images",
+  "label_cols": [
+    "Atelectasis",
+    "Cardiomegaly",
+    "Effusion",
+    "Infiltration",
+    "Mass",
+    "Nodule",
+    "Pneumonia",
+    "Pneumothorax",
+    "Consolidation",
+    "Edema",
+    "Emphysema",
+    "Fibrosis",
+    "Pleural_Thickening",
+    "Hernia"
+  ],
+  "labels_csv": {
+    "path": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\data\\labels.csv",
+    "sha256": "c0b1784dce4215b12396d2e610d70469f91b0c068d6096081fbfee184df93318"
+  },
+  "num_classes": 14,
+  "preprocessing": {
+    "center_crop": null,
+    "normalize_mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "normalize_std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "random_augmentation": false,
+    "resize": [
+      224,
+      224
+    ],
+    "to_tensor": true
+  },
+  "schema_version": 1,
+  "split_counts": {
+    "test": 10983,
+    "train": 89789,
+    "val": 11348
+  },
+  "status": "frozen",
+  "test_used_for_tuning": false,
+  "threshold": {
+    "artifact": "thresholds.json",
+    "sha256": "87480aba2bfe22230d07bc859ff3c0d2c027a934c6cbcc6ff5b6b8511ba95e25",
+    "source": "validation",
+    "strategy": "per_class_max_f1",
+    "values_by_label": {
+      "Atelectasis": 0.263916015625,
+      "Cardiomegaly": 0.271728515625,
+      "Consolidation": 0.10968017578125,
+      "Edema": 0.447509765625,
+      "Effusion": 0.309814453125,
+      "Emphysema": 0.223388671875,
+      "Fibrosis": 0.0548095703125,
+      "Hernia": 0.0233306884765625,
+      "Infiltration": 0.2100830078125,
+      "Mass": 0.2010498046875,
+      "Nodule": 0.1280517578125,
+      "Pleural_Thickening": 0.105224609375,
+      "Pneumonia": 0.0537109375,
+      "Pneumothorax": 0.256591796875
+    }
+  }
+}

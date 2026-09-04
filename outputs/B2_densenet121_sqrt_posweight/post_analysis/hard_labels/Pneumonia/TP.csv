@@ -1,0 +1,19 @@
+image_path,probability,ground_truth,predicted,threshold,coexisting_labels,error_type
+images/00002529_008.png,0.59130859375,1,1,0.36000000000000004,"[""Infiltration"", ""Nodule""]",TP
+images/00002529_022.png,0.50390625,1,1,0.36000000000000004,"[""Atelectasis"", ""Effusion"", ""Infiltration"", ""Edema""]",TP
+images_005/images/00009305_002.png,0.4462890625,1,1,0.36000000000000004,[],TP
+images_005/images/00010773_019.png,0.537109375,1,1,0.36000000000000004,"[""Infiltration"", ""Edema""]",TP
+images_005/images/00011251_010.png,0.375732421875,1,1,0.36000000000000004,"[""Infiltration""]",TP
+images_006/images/00012045_005.png,0.39404296875,1,1,0.36000000000000004,"[""Atelectasis"", ""Effusion""]",TP
+images_006/images/00012777_005.png,0.6396484375,1,1,0.36000000000000004,[],TP
+images_006/images/00013721_005.png,0.39306640625,1,1,0.36000000000000004,"[""Atelectasis""]",TP
+images_008/images/00017081_002.png,0.451416015625,1,1,0.36000000000000004,"[""Edema""]",TP
+images_009/images/00018574_020.png,0.452880859375,1,1,0.36000000000000004,"[""Edema""]",TP
+images_009/images/00018972_004.png,0.70263671875,1,1,0.36000000000000004,"[""Edema""]",TP
+images_009/images/00018972_005.png,0.458740234375,1,1,0.36000000000000004,"[""Infiltration"", ""Edema""]",TP
+images_009/images/00019576_038.png,0.3798828125,1,1,0.36000000000000004,"[""Infiltration"", ""Edema""]",TP
+images_010/images/00022341_003.png,0.4658203125,1,1,0.36000000000000004,"[""Infiltration""]",TP
+images_010/images/00022672_006.png,0.513671875,1,1,0.36000000000000004,"[""Infiltration"", ""Edema""]",TP
+images_011/images/00026389_002.png,0.414306640625,1,1,0.36000000000000004,[],TP
+images_011/images/00027784_006.png,0.478271484375,1,1,0.36000000000000004,"[""Infiltration""]",TP
+images_011/images/00027784_007.png,0.415771484375,1,1,0.36000000000000004,[],TP

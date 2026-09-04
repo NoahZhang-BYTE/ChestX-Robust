@@ -1,0 +1,12 @@
+image_path,probability,ground_truth,predicted,threshold,coexisting_labels,error_type
+images/00001900_028.png,0.0006289482116699219,1,0,0.73,"[""Effusion"", ""Mass"", ""Pleural_Thickening""]",FN
+images/00003272_000.png,0.0002415180206298828,1,0,0.73,[],FN
+images/00003656_000.png,0.1453857421875,1,0,0.73,"[""Cardiomegaly""]",FN
+images/00004747_000.png,0.0009622573852539062,1,0,0.73,"[""Infiltration"", ""Emphysema"", ""Fibrosis"", ""Pleural_Thickening""]",FN
+images_004/images/00007167_000.png,0.013275146484375,1,0,0.73,"[""Atelectasis"", ""Mass""]",FN
+images_004/images/00008885_008.png,0.00586700439453125,1,0,0.73,"[""Atelectasis""]",FN
+images_008/images/00018120_001.png,0.07965087890625,1,0,0.73,"[""Atelectasis""]",FN
+images_009/images/00018999_001.png,0.143310546875,1,0,0.73,"[""Mass"", ""Emphysema"", ""Fibrosis""]",FN
+images_010/images/00021879_000.png,0.015960693359375,1,0,0.73,"[""Infiltration"", ""Fibrosis""]",FN
+images_010/images/00022310_000.png,0.005489349365234375,1,0,0.73,"[""Atelectasis"", ""Pleural_Thickening""]",FN
+images_010/images/00024601_000.png,0.0025310516357421875,1,0,0.73,[],FN

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\胸片AI多标签高鲁棒\formal_train_b4.py", line 167, in <module>
+    main()
+  File "C:\胸片AI多标签高鲁棒\formal_train_b4.py", line 163, in main
+    run_b4_training(args.config, args.resume, args.workflow_state)
+  File "C:\胸片AI多标签高鲁棒\formal_train_b4.py", line 64, in run_b4_training
+    raise FileExistsError(f"B4 output directory already exists: {output_dir}")
+FileExistsError: B4 output directory already exists: outputs\B5_densenet121_asl_scheduler

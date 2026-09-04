@@ -1,0 +1,9 @@
+{
+  "best_macro_auprc": 0.27587486569879244,
+  "best_macro_auroc": 0.8391918119445286,
+  "completed_epoch": 11,
+  "monitor": "macro_auprc",
+  "status": "completed",
+  "stop_reason": "early_stopping",
+  "test_used": false
+}

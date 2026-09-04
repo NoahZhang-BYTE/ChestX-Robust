@@ -1,0 +1,3 @@
+filename,epoch,macro_auroc,macro_auprc,best_metric,file_size,loadable,notes
+best.pt,9,0.8373033352839379,0.2681604423370506,0.8373033352839379,84549628,True,metadata loaded read-only
+last.pt,10,0.8309972142183483,0.25969404251929057,0.8373033352839379,84551932,True,metadata loaded read-only

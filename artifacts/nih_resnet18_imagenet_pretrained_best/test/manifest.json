@@ -1,0 +1,11 @@
+{
+  "files": {
+    "run_metadata.json": "cecb3c8413b91efb86b663e4000d97e638d9da8ecfb27c432f664ee98527710e",
+    "test_per_class_metrics.csv": "3ab95696c479d69ece6e2362ac6e710ba734c2232d6552f183b48cae6c03b588",
+    "test_probabilities.npy": "918c80678071f24c3f655a8dba5e056bef60e66e879b83ab239ed094da1c8d87",
+    "test_summary.json": "6800bfc2237bb24c45748df32e8275d18c907ab07d8b4abae6250c0379a7eb8c",
+    "test_targets.npy": "31fc0386b4b0b2b1d79fc266500c3b1a12aa919f17a4418720925a2465416d1b"
+  },
+  "schema_version": 1,
+  "status": "complete"
+}

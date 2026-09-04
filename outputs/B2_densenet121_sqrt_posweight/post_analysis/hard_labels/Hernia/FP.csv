@@ -1,0 +1,12 @@
+image_path,probability,ground_truth,predicted,threshold,coexisting_labels,error_type
+images/00000359_001.png,0.84375,0,1,0.73,[],FP
+images/00000359_003.png,0.8671875,0,1,0.73,[],FP
+images_004/images/00008885_004.png,0.9814453125,0,1,0.73,"[""Effusion""]",FP
+images_004/images/00008885_005.png,0.99462890625,0,1,0.73,[],FP
+images_006/images/00012138_000.png,0.81884765625,0,1,0.73,[],FP
+images_008/images/00017796_000.png,0.98583984375,0,1,0.73,"[""Atelectasis"", ""Infiltration""]",FP
+images_008/images/00017991_004.png,0.9521484375,0,1,0.73,[],FP
+images_009/images/00018536_002.png,0.998046875,0,1,0.73,"[""Infiltration""]",FP
+images_010/images/00022310_002.png,0.9619140625,0,1,0.73,"[""Atelectasis""]",FP
+images_010/images/00022310_004.png,0.96533203125,0,1,0.73,"[""Atelectasis"", ""Infiltration""]",FP
+images_010/images/00022310_008.png,0.99658203125,0,1,0.73,"[""Atelectasis"", ""Infiltration""]",FP

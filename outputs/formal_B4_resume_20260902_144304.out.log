@@ -1,0 +1,7 @@
+[PASS]
+System commit headroom is sufficient.
+Committed: 15.383 GB
+Limit: 88.508 GB
+Headroom: 73.125 GB
+Headroom percent: 82.620%
+Resume checkpoint: outputs/B4_densenet121_sqrt_posweight_scheduler/last.pt; completed_epoch=6; resume_from_epoch=7; best_metric=0.839362649769259

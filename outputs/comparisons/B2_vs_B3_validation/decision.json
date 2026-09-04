@@ -1,0 +1,45 @@
+{
+  "ASL_RARE_LABEL_BENEFIT": false,
+  "B2": {
+    "macro_AUPRC": 0.2681640084567309,
+    "macro_AUROC": 0.8373047194844901,
+    "macro_F1_tuned": 0.3318033957627889
+  },
+  "B3": {
+    "macro_AUPRC": 0.2697229081966683,
+    "macro_AUROC": 0.8324673595811959,
+    "macro_F1_tuned": 0.33303475460725723
+  },
+  "Hernia": {
+    "B2_AUPRC": 0.3284275597123843,
+    "B3_AUPRC": 0.3006804087169336
+  },
+  "Infiltration_ASL_response": {
+    "B2_AUPRC": 0.3497991719521071,
+    "B2_AUROC": 0.7118746863242154,
+    "B3_AUPRC": 0.3521846221285265,
+    "B3_AUROC": 0.7097281050306403
+  },
+  "Pneumonia_AUPRC": {
+    "B2": 0.058886702787795,
+    "B3": 0.0422317866324538,
+    "relative_change": -0.2828298302820436
+  },
+  "comparison_split": "val",
+  "delta_B3_minus_B2": {
+    "macro_AUPRC": 0.0015588997399373916,
+    "macro_AUROC": -0.004837359903294258,
+    "macro_F1_tuned": 0.0012313588444683443
+  },
+  "near_tie": true,
+  "rule": "near_tie_stability",
+  "same_validation_targets_verified": true,
+  "selection_priority": [
+    "macro AUPRC",
+    "macro AUROC",
+    "tuned macro F1",
+    "Pneumonia/Infiltration/Hernia"
+  ],
+  "test_used_for_selection": false,
+  "winner": "B2_sqrt_pos_weight"
+}
