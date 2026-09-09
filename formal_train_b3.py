@@ -11,7 +11,7 @@ import yaml
 
 from baseline.asl import AsymmetricLoss
 from baseline.data import build_dataloaders
-from baseline.engine import evaluate, load_training_checkpoint, save_checkpoint, save_history, train_one_epoch
+from baseline.engine import evaluate, load_training_checkpoint, restore_rng_state, save_checkpoint, save_history, train_one_epoch
 from baseline.models import build_model
 from formal_train import _enforce_commit_guard
 from train import _resolve_device, _set_seed
@@ -56,6 +56,8 @@ def run_b3_training(
     history: list[dict[str, Any]] = []
     start_epoch, best_auroc, best_auprc = 1, float("-inf"), float("-inf")
     if resume is not None:
+        if resume.get("rng_state") is not None:
+            restore_rng_state(resume["rng_state"])
         model.load_state_dict(resume["model_state_dict"], strict=True)
         optimizer.load_state_dict(resume["optimizer_state_dict"])
         if scaler is not None and resume.get("scaler_state_dict") is not None:
@@ -82,7 +84,9 @@ def run_b3_training(
             save_checkpoint(output_dir / "best_macro_auprc.pt", model, optimizer, epoch, config, row, scaler=scaler, best_metric=best_auprc, history=history)
         save_checkpoint(output_dir / "last.pt", model, optimizer, epoch, config, row, scaler=scaler, best_metric=best_auroc, history=history)
         print(row, flush=True)
-    update_stage(workflow_state_path, "B3_training", "completed")
+    stage_name = config.get("stage") or config.get("workflow_stage")
+    if stage_name == "B3_training":
+        update_stage(workflow_state_path, stage_name, "completed")
     return history
 
 

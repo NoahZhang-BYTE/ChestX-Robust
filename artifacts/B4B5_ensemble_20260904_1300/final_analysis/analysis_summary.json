@@ -1,0 +1,11 @@
+{
+  "source": "artifacts\\B4B5_ensemble_20260904_1300",
+  "threshold_source": "validation_only",
+  "test_used_for_selection": false,
+  "n_test": 10983,
+  "macro_auroc": 0.8467012016216523,
+  "macro_auprc": 0.28164807312738466,
+  "lowest_auroc": "Infiltration",
+  "lowest_f1": "Pneumonia",
+  "image_ids_recovered": true
+}

@@ -5,8 +5,10 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 from baseline.engine import (
+    capture_rng_state,
     fit,
     load_training_checkpoint,
+    restore_rng_state,
     save_checkpoint,
     save_history,
 )
@@ -49,6 +51,24 @@ def test_checkpoint_is_atomic_and_contains_resume_state(tmp_path: Path):
     assert checkpoint["best_metric"] == 0.7
     assert checkpoint["model_state"] == checkpoint["model_state_dict"]
     assert checkpoint["optimizer_state"] == checkpoint["optimizer_state_dict"]
+    assert {"python", "numpy", "torch_cpu", "torch_cuda"} <= checkpoint["rng_state"].keys()
+
+
+def test_rng_state_round_trip_restores_python_numpy_and_torch(monkeypatch):
+    import random
+    import numpy as np
+
+    random.seed(11)
+    np.random.seed(11)
+    torch.manual_seed(11)
+    state = capture_rng_state()
+    expected = (random.random(), float(np.random.random()), float(torch.rand(1)))
+    random.random()
+    np.random.random()
+    torch.rand(1)
+    restore_rng_state(state)
+    actual = (random.random(), float(np.random.random()), float(torch.rand(1)))
+    assert actual == expected
 
 
 def test_history_is_atomically_replaced_each_epoch(tmp_path: Path):

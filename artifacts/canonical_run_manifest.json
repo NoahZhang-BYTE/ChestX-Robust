@@ -1,0 +1,97 @@
+{
+  "bundles": {
+    "B4": {
+      "checkpoint": {
+        "epoch": 7,
+        "path": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\outputs\\B4_densenet121_sqrt_posweight_scheduler\\best_macro_auroc.pt",
+        "sha256": "fa39b48b64f39a1048209eb8c4744e5e18e261ce78966590ce5491ac545a66bf",
+        "validation_macro_auroc": 0.8397443142752273
+      },
+      "path": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B4_densenet121_sqrt_posweight_scheduler_eval_20260904_025154",
+      "protocol_sha256": "fc4ac4f6c0e8fb1407a09348713b0c84e242c838bb4afff39ae3e8c6fd547f23",
+      "protocol_status": "frozen",
+      "split_counts": {
+        "test": 10983,
+        "train": 89789,
+        "val": 11348
+      },
+      "test_manifest_sha256": "d038fbd193b2607cc066a8bb2dd0d3ea9ea56211811b1e45d9626da2ae753c6a",
+      "test_metadata_sha256": "057f7ddd5f691fd2fbabe42d152607d2e564cb32b4ca0cb5605689b621a27994",
+      "test_status": "complete",
+      "test_used_for_tuning": false
+    },
+    "B5": {
+      "checkpoint": {
+        "epoch": 7,
+        "path": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\outputs\\B5_densenet121_asl_scheduler_20260904_0326\\best_macro_auroc.pt",
+        "sha256": "f8d610c65f3f3352b4aa91ee004619ba79443e8056f0890825ac2549e73bf2c8",
+        "validation_macro_auroc": 0.8391918119445286
+      },
+      "path": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B5_densenet121_asl_eval_20260904_1200",
+      "protocol_sha256": "1143fbadd9cdd50a8b7838ba23143de9ad88757f85bc13f26b4da9f15b486fdc",
+      "protocol_status": "frozen",
+      "split_counts": {
+        "test": 10983,
+        "train": 89789,
+        "val": 11348
+      },
+      "test_manifest_sha256": "e5b276a96d5650897c394f9f7f3ab00e23853a30afd8ee812036a76c5910b340",
+      "test_metadata_sha256": "6c6f016d3af3549ab97aaf579ce916ee30ad1d658c3cfe3d12453b945d05b43a",
+      "test_status": "complete",
+      "test_used_for_tuning": false
+    }
+  },
+  "current_stage": "B3_test",
+  "execution_policy": {
+    "allow_implicit_training": false,
+    "allow_stage_start_from_stale_current_stage": false,
+    "manual_approval_required_for_training": true
+  },
+  "final_candidate": {
+    "ensemble_dir": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B4B5_ensemble_20260904_1300",
+    "experiment": "B4B5_ensemble",
+    "macro_auprc": 0.28164807312738466,
+    "macro_auroc": 0.8467012016216523,
+    "selected_weights": {
+      "b4": 0.4,
+      "b5": 0.6
+    },
+    "test_count": 10983,
+    "test_used_for_selection_or_tuning": false,
+    "threshold_source": "validation"
+  },
+  "git_sha": "57539636b435944487dd2f8dd2fee7eb1c055298",
+  "notes": [
+    "B3 has training and validation comparison evidence but no standalone test bundle.",
+    "Historical workflow and registry files were stale at reconciliation time.",
+    "No training or GPU workload was started by reconciliation."
+  ],
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "reconciled_at_utc": "2026-09-09T15:07:13.048088+00:00",
+  "repo_root": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2",
+  "schema_version": 1,
+  "source_hashes": {
+    "ensemble_protocol": "cb5270f6fd515ea7ae9d65aaab5bb46d1c79a2104583601b03efa04b4a7135db",
+    "ensemble_summary": "82a0ba679c4ee466c39139922c3c0b316a72315a698d2581d9c6ca2f911d81f4"
+  },
+  "stages": {
+    "B2_analysis": "completed",
+    "B2_test": "completed",
+    "B2_threshold_tuning": "completed",
+    "B2_training": "completed",
+    "B2_vs_B3": "completed",
+    "B2_vs_B3_validation": "completed",
+    "B3_analysis": "completed",
+    "B3_test": "pending",
+    "B3_threshold_tuning": "completed",
+    "B3_training": "completed",
+    "B4_analysis": "completed",
+    "B4_training": "completed",
+    "B5_confirmation": "completed",
+    "cooccurrence_analysis": "completed",
+    "final_test": "completed",
+    "hard_label_analysis": "completed"
+  },
+  "status": "final_candidate_ready"
+}

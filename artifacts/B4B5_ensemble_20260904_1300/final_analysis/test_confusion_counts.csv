@@ -1,0 +1,15 @@
+,tp,fp,tn,fn
+Atelectasis,453,726,9164,640
+Cardiomegaly,77,126,10608,172
+Effusion,772,794,8951,466
+Infiltration,814,1556,7637,976
+Mass,288,390,9963,342
+Nodule,257,671,9664,391
+Pneumonia,32,745,10131,75
+Pneumothorax,341,628,9785,229
+Consolidation,166,1145,9458,214
+Edema,79,237,10537,130
+Emphysema,148,175,10510,150
+Fibrosis,48,382,10442,111
+Pleural_Thickening,109,409,10242,223
+Hernia,6,6,10960,11

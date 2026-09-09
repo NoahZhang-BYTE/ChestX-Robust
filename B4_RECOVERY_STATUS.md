@@ -1,4 +1,8 @@
-# B4 Recovery Status
+# Historical B4 Recovery Status (superseded by 2026-09-09 reconciliation)
+
+This document preserves the recovery and BSOD evidence from the original run.
+It is a historical artifact, not the current stage ledger. See
+`artifacts/canonical_run_manifest.json` for the reconciled status.
 
 **Generated:** 2026-09-02 (Asia/Singapore)  
 **Experiment:** DenseNet121 + BCEWithLogitsLoss with train-only sqrt-capped `pos_weight`  

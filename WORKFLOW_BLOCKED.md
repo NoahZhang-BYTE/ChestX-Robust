@@ -1,4 +1,10 @@
-# Workflow blocked: B4 resource gate
+# Historical record: B4 resource gate (superseded by 2026-09-09 reconciliation)
+
+This file preserves the original interruption evidence. It is not the current
+workflow status. The current canonical status is
+`artifacts/canonical_run_manifest.json`; later B4/B5 frozen evaluation bundles
+and the B4+B5 ensemble were verified there. Do not use this historical block
+to launch or suppress a new run without a fresh hardware safety check.
 
 - Stage: B4 DenseNet121 sqrt-capped `pos_weight` training
 - Date: 2026-09-02 (Asia/Singapore)

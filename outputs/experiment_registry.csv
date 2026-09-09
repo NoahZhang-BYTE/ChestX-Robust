@@ -1,2 +1,6 @@
 experiment,backbone,resolution,loss,batch,lr,scheduler,epochs_completed,best_val_macro_auroc,best_val_macro_auprc,test_macro_auroc,test_macro_auprc,test_macro_f1_tuned,status,notes
-B2,densenet121,224,bce_sqrt_pos_weight,32,0.0003,none,8,,,,,running,"Current process still running; do not start duplicate"
+B2,densenet121,224,bce_sqrt_pos_weight,32,0.0003,none,10,0.8373033353,0.2681604423,0.8385204184,0.2607234194,0.3231687659,completed,Historical formal run; validation-frozen test.
+B3,densenet121,224,asymmetric,32,0.0003,none,10,0.8324673596,,,,,validation_only,No standalone test bundle; B2 comparison is validation-only.
+B4,densenet121,224,bce_sqrt_pos_weight,32,0.0003,reduce_on_plateau,11,0.8397443142752273,,0.839870953,0.2699441226,0.3287278906,completed,Checkpoint epoch 7; frozen validation thresholds.
+B5,densenet121,224,asymmetric,32,0.0003,reduce_on_plateau,11,0.8391918119445286,,0.8383467653,0.2692288032,0.3194538004,completed,Checkpoint epoch 7; frozen validation thresholds.
+B4B5_ensemble,densenet121,224,weighted_probability_ensemble,,,,,,,0.8467012016216523,0.28164807312738466,0.3407095818,final_candidate_ready,Weights and thresholds selected on validation only; test evaluated once for this final bundle.

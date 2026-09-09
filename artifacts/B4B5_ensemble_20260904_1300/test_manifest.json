@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "scope": "ensemble_test_outputs",
+  "test_used_for_selection_or_tuning": false,
+  "files": {
+    "test_per_class_metrics.csv": "79f31f2b312b89c5dc5df7eb485625aaa5eda2eda41114d0c9a3a2966807eec2",
+    "test_probabilities.npy": "f56c6db66fd8b2aecad0fa65665a1e75b04569da6528df4350d2c34b670960a5",
+    "test_targets.npy": "31fc0386b4b0b2b1d79fc266500c3b1a12aa919f17a4418720925a2465416d1b",
+    "ensemble_results.json": "e5d7c56f03b7bb5a7afbf5653ce0fe1f6292533c01967a7aeadf9967353b72a1",
+    "thresholds.json": "b9dcca2fa8315cb4b1057d15bcab31ba8f1a183bc0151717984000111dbc2d68"
+  },
+  "sample_count": 10983,
+  "label_count": 14,
+  "created_at_utc": "2026-09-09T00:00:00Z"
+}

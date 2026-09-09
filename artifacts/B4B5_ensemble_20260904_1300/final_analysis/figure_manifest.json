@@ -1,0 +1,39 @@
+{
+  "source_artifact_dir": "artifacts\\B4B5_ensemble_20260904_1300",
+  "source_files": {
+    "test_targets.npy": {
+      "path": "artifacts\\B4B5_ensemble_20260904_1300\\test_targets.npy",
+      "sha256": "31fc0386b4b0b2b1d79fc266500c3b1a12aa919f17a4418720925a2465416d1b"
+    },
+    "test_probabilities.npy": {
+      "path": "artifacts\\B4B5_ensemble_20260904_1300\\test_probabilities.npy",
+      "sha256": "f56c6db66fd8b2aecad0fa65665a1e75b04569da6528df4350d2c34b670960a5"
+    },
+    "thresholds.json": {
+      "path": "artifacts\\B4B5_ensemble_20260904_1300\\thresholds.json",
+      "sha256": "b9dcca2fa8315cb4b1057d15bcab31ba8f1a183bc0151717984000111dbc2d68"
+    }
+  },
+  "outputs": [
+    "README.md",
+    "analysis_summary.json",
+    "final_analysis_report.md",
+    "per_class_performance.pdf",
+    "per_class_performance.png",
+    "prevalence_vs_f1_auprc.pdf",
+    "prevalence_vs_f1_auprc.png",
+    "test_confusion_counts.csv",
+    "test_confusion_summary.pdf",
+    "test_confusion_summary.png",
+    "test_metrics_with_confusion.csv",
+    "test_roc_pr.pdf",
+    "test_roc_pr.png",
+    "top_error_cases.csv"
+  ],
+  "transformations": [
+    "sigmoid probabilities already persisted",
+    "validation-only frozen per-class thresholds",
+    "no smoothing or interpolation"
+  ],
+  "image_ids": "labels.csv test rows included only when their label matrix exactly matches test_targets.npy"
+}

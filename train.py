@@ -1,23 +1,17 @@
 from __future__ import annotations
 
 import argparse
-import random
-
-import numpy as np
 import torch
 
 from baseline.config import load_config
 from baseline.data import build_dataloaders
 from baseline.engine import fit
 from baseline.models import build_model
+from baseline.reproducibility import seed_everything
 
 
 def _set_seed(seed: int) -> None:
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
+    seed_everything(seed)
 
 
 def _resolve_device(value: str) -> torch.device:
@@ -34,12 +28,15 @@ def main() -> None:
     parser.add_argument("--config", default="configs/baseline.yaml")
     args = parser.parse_args()
     config = load_config(args.config)
-    _set_seed(int(config.get("seed", 42)))
+    seed_everything(int(config.get("seed", 42)), bool(config.get("deterministic", config.get("training", {}).get("deterministic", False))))
     device = _resolve_device(config.get("device", "auto"))
-    if device.type == "cuda":
+    deterministic = bool(config.get("deterministic", config.get("training", {}).get("deterministic", False)))
+    if device.type == "cuda" and not deterministic:
         torch.backends.cudnn.benchmark = True
 
     data_config = config["data"]
+    data_config = dict(data_config)
+    data_config.setdefault("deterministic", deterministic)
     train_loader, val_loader, label_cols = build_dataloaders(**data_config)
     config["data"]["label_cols"] = label_cols
     model_config = config["model"]

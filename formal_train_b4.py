@@ -11,7 +11,7 @@ import torch
 
 from baseline.asl import AsymmetricLoss
 from baseline.data import build_dataloaders
-from baseline.engine import build_training_criterion, evaluate, load_training_checkpoint, save_checkpoint, save_history, train_one_epoch
+from baseline.engine import build_training_criterion, evaluate, load_training_checkpoint, restore_rng_state, save_checkpoint, save_history, train_one_epoch
 from baseline.models import build_model
 from formal_train import _enforce_commit_guard
 from night_workflow import should_early_stop
@@ -84,6 +84,8 @@ def run_b4_training(
     start_epoch, best_auroc, best_auprc, stale = 1, float("-inf"), float("-inf"), 0
     min_delta = float(config["training"].get("early_stopping_min_delta", 1e-4))
     if resume is not None:
+        if resume.get("rng_state") is not None:
+            restore_rng_state(resume["rng_state"])
         model.load_state_dict(resume["model_state_dict"], strict=True)
         optimizer.load_state_dict(resume["optimizer_state_dict"])
         if scaler is not None and resume.get("scaler_state_dict") is not None:
@@ -150,7 +152,11 @@ def run_b4_training(
         "monitor": "macro_auprc",
         "test_used": False,
     })
-    update_stage(workflow_state_path, "B4_training", "completed")
+    # Ledger mutation is opt-in; historical wrappers must not infer a stage
+    # from stale workflow state (B5 also reuses this implementation).
+    stage_name = config.get("stage") or config.get("workflow_stage")
+    if stage_name == "B4_training":
+        update_stage(workflow_state_path, stage_name, "completed")
     return history
 
 

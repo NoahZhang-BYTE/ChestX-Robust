@@ -1,4 +1,8 @@
-# Long Workflow Report
+# Historical Long Workflow Report (superseded by 2026-09-09 reconciliation)
+
+The workflow state and registry referenced below were stale when this report
+was written. Use `artifacts/canonical_run_manifest.json` as the current source
+for stage status and final candidate provenance.
 
 This report is populated only after B2/B3/B4 completion gates have produced
 validated artifacts. It is intentionally not marked complete while B2 is still

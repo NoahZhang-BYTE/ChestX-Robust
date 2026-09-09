@@ -8,6 +8,7 @@ import pandas as pd
 import torch
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
+from .reproducibility import make_generator, seed_worker
 from torchvision import transforms
 
 from baseline.labels import LABEL_COLUMNS
@@ -80,6 +81,7 @@ def build_dataloaders(
     prefetch_factor: int | None = 2,
     persistent_workers: bool = True,
     seed: int = 42,
+    deterministic: bool = False,
 ) -> tuple[DataLoader, DataLoader, list[str]]:
     frame = pd.read_csv(csv_path)
     if not label_cols:
@@ -117,14 +119,17 @@ def build_dataloaders(
     val_dataset = MultiLabelImageDataset(val_frame, image_root, image_col, label_cols, val_transform)
     if num_workers < 0:
         raise ValueError("num_workers must be non-negative")
-    loader_kwargs = {"batch_size": batch_size, "num_workers": num_workers, "pin_memory": torch.cuda.is_available()}
+    loader_kwargs = {"batch_size": batch_size, "num_workers": num_workers, "pin_memory": torch.cuda.is_available(), "worker_init_fn": seed_worker, "generator": make_generator(seed)}
     if num_workers:
         if prefetch_factor is None or prefetch_factor < 1:
             raise ValueError("prefetch_factor must be at least 1 when num_workers is enabled")
-        loader_kwargs.update(prefetch_factor=prefetch_factor, persistent_workers=persistent_workers)
+        loader_kwargs.update(prefetch_factor=prefetch_factor, persistent_workers=(persistent_workers and not deterministic))
+    val_kwargs = dict(loader_kwargs)
+    val_kwargs["shuffle"] = False
+    val_kwargs["generator"] = make_generator(seed + 1)
     return (
         DataLoader(train_dataset, shuffle=True, **loader_kwargs),
-        DataLoader(val_dataset, shuffle=False, **loader_kwargs),
+        DataLoader(val_dataset, **val_kwargs),
         label_cols,
     )
 

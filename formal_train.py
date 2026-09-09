@@ -100,6 +100,8 @@ def run_formal_training(
             "best_metric": best_metric,
             "optimizer_state_dict": resume_checkpoint["optimizer_state_dict"],
             "scaler_state_dict": resume_checkpoint["scaler_state_dict"],
+            "resume_rng_state": resume_checkpoint.get("rng_state"),
+            "stale_epochs": resume_checkpoint.get("stale_epochs", 0),
         }
     history = fit(model, train_loader, val_loader, config, device, criterion=criterion, **fit_kwargs)
     print(f"history_rows={len(history)} history_path={output_dir / 'history.csv'}", flush=True)

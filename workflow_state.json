@@ -9,14 +9,32 @@
   "B3_test": "pending",
   "B3_threshold_tuning": "completed",
   "B3_training": "completed",
-  "B4_analysis": "pending",
+  "B4_analysis": "completed",
   "B4_training": "completed",
-  "B5_confirmation": "pending",
+  "B5_confirmation": "completed",
   "cooccurrence_analysis": "completed",
   "current_stage": "B3_test",
-  "final_test": "pending",
+  "execution_policy": {
+    "allow_implicit_training": false,
+    "allow_stage_start_from_stale_current_stage": false,
+    "manual_approval_required_for_training": true
+  },
+  "final_candidate": {
+    "ensemble_dir": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B4B5_ensemble_20260904_1300",
+    "experiment": "B4B5_ensemble",
+    "macro_auprc": 0.28164807312738466,
+    "macro_auroc": 0.8467012016216523,
+    "selected_weights": {
+      "b4": 0.4,
+      "b5": 0.6
+    },
+    "test_count": 10983,
+    "test_used_for_selection_or_tuning": false,
+    "threshold_source": "validation"
+  },
+  "final_test": "completed",
   "hard_label_analysis": "completed",
-  "last_update": "2026-09-04T03:58:25.043594+00:00",
+  "last_update": "2026-09-09T15:07:13.048088+00:00",
   "night_mode": {
     "b5_forbidden": true,
     "initialized": true,
@@ -32,10 +50,12 @@
       "latest_record_id": null
     }
   },
+  "reconciliation_manifest": "artifacts\\canonical_run_manifest.json",
   "recovery_count": {
     "B3_training": 2,
     "B4_training": 1
   },
+  "schema_version": 1,
   "stages": {
     "B2_analysis": "completed",
     "B2_test": "completed",
@@ -47,11 +67,12 @@
     "B3_test": "pending",
     "B3_threshold_tuning": "completed",
     "B3_training": "completed",
-    "B4_analysis": "pending",
+    "B4_analysis": "completed",
     "B4_training": "completed",
-    "B5_confirmation": "pending",
+    "B5_confirmation": "completed",
     "cooccurrence_analysis": "completed",
-    "final_test": "pending",
+    "final_test": "completed",
     "hard_label_analysis": "completed"
-  }
+  },
+  "status": "final_candidate_ready"
 }
