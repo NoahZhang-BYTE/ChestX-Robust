@@ -1,0 +1,20 @@
+{
+  "source": "validation",
+  "fit_split": "val",
+  "strategy": "per_class_max_f1",
+  "label_cols": [
+    "Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass",
+    "Nodule", "Pneumonia", "Pneumothorax", "Consolidation", "Edema",
+    "Emphysema", "Fibrosis", "Pleural_Thickening", "Hernia"
+  ],
+  "thresholds": [0.5147298171728516, 0.6339763495605468, 0.49649931252539065, 0.507599243875, 0.49416928515820313, 0.45772254016113284, 0.3748472877617188, 0.5222044100332031, 0.42721861687109375, 0.48028564453125, 0.6390063858203126, 0.47336398049804684, 0.513370481234375, 0.7674401293574219],
+  "thresholds_by_label": {
+    "Atelectasis": 0.5147298171728516, "Cardiomegaly": 0.6339763495605468,
+    "Effusion": 0.49649931252539065, "Infiltration": 0.507599243875,
+    "Mass": 0.49416928515820313, "Nodule": 0.45772254016113284,
+    "Pneumonia": 0.3748472877617188, "Pneumothorax": 0.5222044100332031,
+    "Consolidation": 0.42721861687109375, "Edema": 0.48028564453125,
+    "Emphysema": 0.6390063858203126, "Fibrosis": 0.47336398049804684,
+    "Pleural_Thickening": 0.513370481234375, "Hernia": 0.7674401293574219
+  }
+}

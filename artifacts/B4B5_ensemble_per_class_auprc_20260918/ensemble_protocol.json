@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "method": "per_class_weighted_average_of_frozen_sigmoid_probabilities",
+  "selection_rule": "independent_per_class_validation_AUPRC_maximize",
+  "selected_weights": {
+    "Atelectasis": {"b4": 0.287356324, "b5": 0.712643676},
+    "Cardiomegaly": {"b4": 0.465753428, "b5": 0.534246572},
+    "Effusion": {"b4": 0.241776316, "b5": 0.7582236840000001},
+    "Infiltration": {"b4": 0.18374218399999998, "b5": 0.816257816},
+    "Mass": {"b4": 0.202173916, "b5": 0.797826084},
+    "Nodule": {"b4": 0.288449268, "b5": 0.7115507320000001},
+    "Pneumonia": {"b4": 0.183364144, "b5": 0.816635856},
+    "Pneumothorax": {"b4": 0.259225096, "b5": 0.740774904},
+    "Consolidation": {"b4": 0.30442804799999995, "b5": 0.6955719520000001},
+    "Edema": {"b4": 0.25, "b5": 0.75},
+    "Emphysema": {"b4": 0.19467293600000002, "b5": 0.805327064},
+    "Fibrosis": {"b4": 0.14364236000000002, "b5": 0.8563576399999999},
+    "Pleural_Thickening": {"b4": 0.102065616, "b5": 0.897934384},
+    "Hernia": {"b4": 0.716443064, "b5": 0.283556936}
+  },
+  "threshold_source": "validation",
+  "test_used_for_selection_or_tuning": false,
+  "split_counts": {"test": 10983, "train": 89789, "val": 11348},
+  "label_cols": [
+    "Atelectasis", "Cardiomegaly", "Effusion", "Infiltration", "Mass",
+    "Nodule", "Pneumonia", "Pneumothorax", "Consolidation", "Edema",
+    "Emphysema", "Fibrosis", "Pleural_Thickening", "Hernia"
+  ],
+  "sources": {
+    "b4_eval_dir": "artifacts/B4_densenet121_sqrt_posweight_scheduler_eval_20260904_025154",
+    "b5_eval_dir": "artifacts/B5_densenet121_asl_eval_20260904_1200",
+    "b4_protocol_sha256": "fc4ac4f6c0e8fb1407a09348713b0c84e242c838bb4afff39ae3e8c6fd547f23",
+    "b5_protocol_sha256": "1143fbadd9cdd50a8b7838ba23143de9ad88757f85bc13f26b4da9f15b486fdc"
+  },
+  "created_at_utc": "2026-09-18T05:43:34.379702+00:00"
+}

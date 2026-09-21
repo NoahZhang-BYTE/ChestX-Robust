@@ -1,0 +1,70 @@
+{
+  "selection_rule": "per_class_validation_AUPRC_maximize",
+  "threshold_source": "validation_only",
+  "test_used_for_selection_or_tuning": false,
+  "weights_by_label": {
+    "Atelectasis": 0.287356324, "Cardiomegaly": 0.465753428,
+    "Effusion": 0.241776316, "Infiltration": 0.18374218399999998,
+    "Mass": 0.202173916, "Nodule": 0.288449268,
+    "Pneumonia": 0.183364144, "Pneumothorax": 0.259225096,
+    "Consolidation": 0.30442804799999995, "Edema": 0.25,
+    "Emphysema": 0.19467293600000002, "Fibrosis": 0.14364236000000002,
+    "Pleural_Thickening": 0.102065616, "Hernia": 0.716443064
+  },
+  "validation": {
+    "macro_auroc": 0.848017902796568,
+    "micro_auroc": 0.8761245953609924,
+    "macro_auprc": 0.2885950405801037,
+    "micro_auprc": 0.34348896593580613,
+    "macro_f1_at_0.5": 0.3294413178905472,
+    "micro_f1_at_0.5": 0.3964783565663976,
+    "sample_f1_at_0.5": 0.19077053835601598,
+    "macro_f1_tuned": 0.35367667852949075,
+    "micro_f1_tuned": 0.386135831381733,
+    "sample_f1_tuned": 0.18141329453454935,
+    "per_class_auc": [
+      {"label": "Atelectasis", "auroc": 0.8210885706518951, "auprc": 0.3673710057970545},
+      {"label": "Cardiomegaly", "auroc": 0.9124135929627919, "auprc": 0.3375700124598115},
+      {"label": "Effusion", "auroc": 0.8783545699967694, "auprc": 0.5372380350897978},
+      {"label": "Infiltration", "auroc": 0.7219394300717445, "auprc": 0.36446828326842684},
+      {"label": "Mass", "auroc": 0.8360733075261592, "auprc": 0.32147636448173966},
+      {"label": "Nodule", "auroc": 0.7723618613063846, "auprc": 0.2568161635794546},
+      {"label": "Pneumonia", "auroc": 0.7879250568471654, "auprc": 0.06512971585300312},
+      {"label": "Pneumothorax", "auroc": 0.8846260630540231, "auprc": 0.35548515983976214},
+      {"label": "Consolidation", "auroc": 0.8148104225160764, "auprc": 0.1681556640575184},
+      {"label": "Edema", "auroc": 0.9097380614470976, "auprc": 0.2031056210714592},
+      {"label": "Emphysema", "auroc": 0.9275140951556734, "auprc": 0.4182498720173281},
+      {"label": "Fibrosis", "auroc": 0.8340593868935854, "auprc": 0.1115762163677134},
+      {"label": "Pleural_Thickening", "auroc": 0.8221470487897039, "auprc": 0.14572764568229665},
+      {"label": "Hernia", "auroc": 0.949199171932883, "auprc": 0.3879608085560868}
+    ]
+  },
+  "test": {
+    "macro_auroc": 0.8470769249593708,
+    "micro_auroc": 0.8814023769370625,
+    "macro_auprc": 0.2816477657994597,
+    "micro_auprc": 0.3438998631690105,
+    "macro_f1_at_0.5": 0.33281998564744636,
+    "micro_f1_at_0.5": 0.39935081932883093,
+    "sample_f1_at_0.5": 0.18116609179160395,
+    "macro_f1_tuned": 0.33927838663987664,
+    "micro_f1_tuned": 0.37748043423377936,
+    "sample_f1_tuned": 0.16764502556635855,
+    "per_class_auc": [
+      {"label": "Atelectasis", "auroc": 0.8247184722709179, "auprc": 0.36885297288698216},
+      {"label": "Cardiomegaly", "auroc": 0.9070535916724471, "auprc": 0.2737837269515514},
+      {"label": "Effusion", "auroc": 0.8917512895474337, "auprc": 0.5414622577709585},
+      {"label": "Infiltration", "auroc": 0.7240703243359199, "auprc": 0.35106752284456616},
+      {"label": "Mass", "auroc": 0.8721276249963588, "auprc": 0.3714633074422604},
+      {"label": "Nodule", "auroc": 0.7868061901604879, "auprc": 0.2605589319297529},
+      {"label": "Pneumonia", "auroc": 0.7697897797774745, "auprc": 0.03599801509174637},
+      {"label": "Pneumothorax", "auroc": 0.8788814083610061, "auprc": 0.34489766968519997},
+      {"label": "Consolidation", "auroc": 0.8016376943963227, "auprc": 0.13763627796649666},
+      {"label": "Edema", "auroc": 0.9068604375410233, "auprc": 0.20569641617704948},
+      {"label": "Emphysema", "auroc": 0.9392132230782034, "auprc": 0.4050675513510413},
+      {"label": "Fibrosis", "auroc": 0.8393338586044522, "auprc": 0.11408199070932333},
+      {"label": "Pleural_Thickening", "auroc": 0.8228988623727846, "auprc": 0.17769006862061934},
+      {"label": "Hernia", "auroc": 0.8939341923163575, "auprc": 0.35481201176488836}
+    ]
+  }
+}
