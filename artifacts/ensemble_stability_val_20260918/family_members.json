@@ -1,0 +1,9 @@
+{
+  "B4": [
+    "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B4_densenet121_sqrt_posweight_scheduler_eval_20260904_025154\\validation_probabilities.npy"
+  ],
+  "B5": [
+    "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B5_densenet121_asl_eval_20260904_1200\\validation_probabilities.npy"
+  ],
+  "interpretation": "family probabilities are arithmetic means; one source per family is a single-member baseline, not an independent diversity result"
+}

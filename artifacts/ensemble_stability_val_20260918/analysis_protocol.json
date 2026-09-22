@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "analysis": "validation_only_ensemble_stability",
+  "selection_or_tuning_split": "val",
+  "test_read": false,
+  "thresholds_fixed": true,
+  "threshold_policy": "one fixed validation threshold array reused by every weight candidate; thresholds are never refit per candidate",
+  "complementarity_note": "a convex B4/B5 blend with a single fixed threshold cannot flip a row where both models agree, so candidate_correct_when_both_wrong is structurally zero and is reported only as a diagnostic",
+  "threshold_source": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B4B5_ensemble_20260904_1300\\thresholds.json",
+  "weight_source": "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B4B5_ensemble_per_class_auprc_20260918\\per_class_weights.csv",
+  "labels_csv_sha256": "c0b1784dce4215b12396d2e610d70469f91b0c068d6096081fbfee184df93318",
+  "bootstrap": {
+    "unit": "patient",
+    "draws": 1000,
+    "seed": 42,
+    "patient_count": 3080
+  },
+  "families": {
+    "B4": [
+      "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B4_densenet121_sqrt_posweight_scheduler_eval_20260904_025154\\validation_probabilities.npy"
+    ],
+    "B5": [
+      "C:\\\u80f8\u7247AI\u591a\u6807\u7b7e\u9ad8\u9c81\u68d2\\artifacts\\B5_densenet121_asl_eval_20260904_1200\\validation_probabilities.npy"
+    ]
+  },
+  "candidate_names": [
+    "global_0.5",
+    "global_0.4",
+    "per_class",
+    "per_class_shrinkage_0.25",
+    "per_class_shrinkage_0.50",
+    "per_class_shrinkage_0.75"
+  ]
+}
