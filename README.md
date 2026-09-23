@@ -2,9 +2,34 @@
 
 A project aiming at developing robust multi-label chest X-ray classification models that generalize reliably across datasets, acquisition settings, and hidden test environments. It provides a configurable baseline built on the NIH ChestX-ray14 dataset, with reproducible data preparation, training, validation, and evaluation workflows.
 
-This is a minimal, configurable baseline for a hidden-test-set medical image competition. It includes an adapter for prepared NIH ChestX-ray14 metadata.
+The 2026 NCCCU competition contract is now published: 10 classes, organizer-only
+training data, study-level submission rows, macro-AUC as the primary metric,
+and macro-F1 as the tie-breaker. See
+[docs/COMPETITION_SPEC.md](docs/COMPETITION_SPEC.md) before adapting this code.
+The existing NIH models, labels, and reported scores are historical research
+artifacts, not competition-ready models.
 
-## Current project status
+## Competition readiness
+
+Do not submit the existing B4+B5 ensemble. It was trained for the 14-label NIH
+schema and uses data that is outside the organizer-provided competition set.
+The competition requires a new 10-output model trained only from the official
+data and an inference path that aggregates one or more images by `Study_id`.
+The B4/B5 loss pairing, ensemble workflow, leakage controls, validation-only
+tuning discipline, and long-tail experiment conclusions remain the starting
+methodology. The old weights, checkpoints, thresholds, and per-class ensemble
+parameters do not transfer. The first formal competition baseline is a clean
+retraining of both branches on the official 10-class data, followed by explicit
+study-level aggregation and complementarity analysis.
+
+The official class map and submission example are currently embedded as images
+on the website. Add the downloaded `sample_submission.csv` and official metadata
+under the ignored `data/` directory before implementing the final label map or
+submission writer. The published prose is ambiguous about whether all ten
+probabilities or only classes at or above `0.5` must be emitted, so the sample
+file must be treated as authoritative.
+
+## Historical NIH project status
 
 The current evidence-backed candidate is the B4+B5 DenseNet121 probability
 ensemble (`0.4 x B4 + 0.6 x B5`) with validation-only weight and threshold
@@ -21,7 +46,7 @@ keeps `B3_test` pending because no standalone B3 test bundle was found, while
 the B4/B5 final candidate is complete. No workflow command may implicitly start
 training from a stale stage.
 
-## Expected local data
+## Historical NIH data
 
 ```text
 data/
@@ -30,18 +55,24 @@ data/
     images_001/image_00001.png
 ```
 
-The default configuration expects `labels.csv` with a relative `path` column and the canonical NIH disease columns:
+The existing default configuration expects `labels.csv` with a relative `path`
+column and the canonical NIH disease columns:
 
 ```csv
 image_id,path,split,patient_id,Atelectasis,Cardiomegaly,...,Hernia
 00000001_000.png,images_001/00000001_000.png,train,1,0,1,...,0
 ```
 
-Leave `data.label_cols` empty to select the canonical 14 NIH labels from a prepared CSV. Set it to an explicit ordered list for a different dataset schema.
+Leave `data.label_cols` empty only for the historical NIH workflow. A competition
+configuration must set an explicit ordered list matching the official 10-class
+mapping; do not rely on automatic metadata-column inference.
 
 ## Install and verify
 
-The project has been verified with Python 3.12, PyTorch 2.11.0+cu128, torchvision 0.26.0+cu128, and an RTX 5070 Laptop GPU. From the project root:
+The project has been verified locally with Python 3.12, PyTorch 2.11.0+cu128,
+torchvision 0.26.0+cu128, and an RTX 5070 Laptop GPU. The competition runtime is
+PyTorch 2.10.0, torchvision 0.25.0, CUDA 12.8, and an NVIDIA T4; final packaging
+and latency must be verified in that environment. From the project root:
 
 ```powershell
 uv pip install --python '.\.venv\Scripts\python.exe' numpy pandas pillow scikit-learn pyyaml tqdm pytest

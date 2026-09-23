@@ -1,7 +1,8 @@
-.venv/
+.venv
 __pycache__/
 .pytest_cache/
-checkpoints/
-data/
+checkpoints
+data
 *.pt
 .superpowers/
+.opencode
